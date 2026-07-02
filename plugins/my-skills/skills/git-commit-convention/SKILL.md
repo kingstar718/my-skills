@@ -1,6 +1,6 @@
 ---
 name: git-commit-convention
-description: Use when the user asks to create, revise, or execute a Git commit. Generates an accurate Conventional Commit message and only stages or commits files when explicitly requested.
+description: Use when the user asks to create, revise, or execute a Git commit. Generates an accurate Conventional Commit message, records the active AI agent and model, and only stages or commits files when explicitly requested.
 ---
 
 # Git Commit 规范
@@ -40,4 +40,33 @@ description: Use when the user asks to create, revise, or execute a Git commit. 
 
 subject 遵循仓库近期提交使用的语言；无法判断时使用中文。标题足以准确表达时省略正文，否则用简短 bullet 说明关键改动。不得编造 diff 中不存在的内容。
 
-只有用户或运行环境明确提供独立的 AI 姓名和邮箱时才添加 `Co-Authored-By`；不得使用 Git 用户身份，也不得猜测模型、姓名或邮箱。
+## AI 使用信息
+
+在 message 末尾追加一行：
+
+```text
+AI-Generated-By: <Agent 名称及版本> / <模型>
+```
+
+首次需要生成该行时，主动获取实际参与当前会话的 Agent、Agent 版本和模型，并在本次会话中记住结果。后续提交直接复用，不重复运行版本命令或读取配置。出现以下情况时重新获取：
+
+- 开始了新会话。
+- 用户切换了模型或 Agent。
+- 当前环境明确表明版本或模型已变化。
+- 用户要求刷新 AI 使用信息。
+
+按当前运行环境选择探测方式：
+
+- Codex：Agent 记为 `Codex CLI`，使用 `codex --version` 获取版本；模型优先使用当前会话信息，其次读取当前生效的 Codex 配置。
+- Claude Code：Agent 记为 `Claude Code`，使用 `claude --version` 获取版本；模型优先使用当前会话信息，其次读取当前生效的 Claude Code 配置。
+- 其他 Agent：使用运行环境明确提供的名称和模型；优先通过该 Agent 自身的版本命令获取版本，其次读取其当前生效配置。
+
+不得根据产品默认值猜测。某一项无法可靠获取时写 `unknown`，不要用其他工具、Git 用户身份或推测值补齐。会话缓存只保留在当前对话上下文中，不写入仓库或全局配置。
+
+示例：
+
+```text
+AI-Generated-By: Codex CLI 0.142.4 / gpt-5.5
+```
+
+Git 的 Author 已使用当前仓库配置的用户名和邮箱，因此不添加 `Co-Authored-By`，也不重复写入 Git 用户身份。
