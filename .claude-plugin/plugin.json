@@ -6,5 +6,5 @@
     "name": "kingstar718",
     "email": "wujinxing@sf-express.com"
   },
-  "skills": "./skills"
+  "skills": "./plugins/my-skills/skills"
 }

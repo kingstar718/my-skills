@@ -1,0 +1,31 @@
+{
+  "name": "my-skills",
+  "version": "1.0.0",
+  "description": "个人 Git 工作流 Skill 集合",
+  "author": {
+    "name": "kingstar718",
+    "email": "wujinxing@sf-express.com",
+    "url": "https://github.com/kingstar718"
+  },
+  "homepage": "https://github.com/kingstar718/my-skills",
+  "repository": "https://github.com/kingstar718/my-skills",
+  "keywords": [
+    "git",
+    "conventional-commits",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "My Skills",
+    "shortDescription": "规范 Git 提交与日常开发工作流。",
+    "longDescription": "提供跨 Codex 与 Claude Code 使用的个人开发 Skill，当前包含安全、准确的 Git 提交规范。",
+    "developerName": "kingstar718",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Write"
+    ],
+    "defaultPrompt": [
+      "按仓库改动生成规范的 Git commit。"
+    ]
+  }
+}
