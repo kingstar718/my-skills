@@ -38,7 +38,7 @@ description: Use when the user asks to create, revise, or execute a Git commit. 
 | style | 格式调整（不影响逻辑） |
 | perf | 性能优化 |
 
-subject 遵循仓库近期提交使用的语言；无法判断时使用中文。标题足以准确表达时省略正文，否则用简短 bullet 说明关键改动。不得编造 diff 中不存在的内容。
+subject 默认使用中文，`type` 和 `scope` 保持英文；仅当用户明确要求其他语言时切换，不因仓库近期提交使用英文而自动跟随。标题足以准确表达时省略正文，否则用简短中文 bullet 说明关键改动。不得编造 diff 中不存在的内容。
 
 ## AI 使用信息
 
