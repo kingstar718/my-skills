@@ -5,6 +5,7 @@
 ## 包含的 Skill
 
 - `git-commit-convention`：提交前检查目标文件，生成中文 Conventional Commits message，并仅在 AI 身份明确时添加联署。
+- `my-statusline`：为 Claude Code 配置底部状态栏(模型 | 目录 | git 分支 | 上下文用量进度条)，`/my-statusline` 应用。
 
 ## Codex 安装
 
