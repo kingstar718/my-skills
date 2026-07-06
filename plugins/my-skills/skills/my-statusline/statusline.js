@@ -48,15 +48,33 @@ parts.push(
     reset
 );
 
-// 订阅用量:5 小时窗口与 7 天(周)窗口的已用百分比,配色阈值同上下文进度条。
+// 订阅用量:5 小时窗口与 7 天(周)窗口的已用百分比,配色阈值同上下文进度条,
+// 并在有 resets_at 时附加该窗口的重置时刻,便于判断何时恢复额度。
 // rate_limits 仅对 Claude.ai 订阅者、且本会话首次 API 响应后才出现,
-// 且 five_hour / seven_day 可能各自缺失,所以每段都要判空后再显示。
+// 且 five_hour / seven_day 及各自的 resets_at 都可能缺失,均需判空后再显示。
+const pad2 = (n) => String(n).padStart(2, "0");
+const fmtReset = (secs) => {
+  const at = new Date(secs * 1000); // Unix 秒转本地时间
+  const now = new Date();
+  const hm = pad2(at.getHours()) + ":" + pad2(at.getMinutes());
+  const sameDay =
+    at.getFullYear() === now.getFullYear() &&
+    at.getMonth() === now.getMonth() &&
+    at.getDate() === now.getDate();
+  // 当天只显示时刻;跨天(如 7 天窗口)补上 月/日 以消除歧义。
+  return sameDay ? hm : at.getMonth() + 1 + "/" + at.getDate() + " " + hm;
+};
 const usageSeg = (label, window) => {
   const p = window?.used_percentage;
-  if (typeof p !== "number") return; // 字段缺失则整段省略
+  if (typeof p !== "number") return;                         // 用量缺失则整段省略
   const pct = Math.round(p);
   const c = pct < 70 ? 32 : pct < 90 ? 33 : 31;
-  parts.push(color(c) + label + " " + pct + "%" + reset);
+  let text = label + " " + pct + "%";
+  const resetAt = window.resets_at;                          // Unix 秒;可能缺失
+  if (typeof resetAt === "number") {
+    text += " " + fmtReset(resetAt);                         // 附加重置时刻
+  }
+  parts.push(color(c) + text + reset);
 };
 usageSeg("5h", d.rate_limits?.five_hour);
 usageSeg("7d", d.rate_limits?.seven_day);

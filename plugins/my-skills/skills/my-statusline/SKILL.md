@@ -8,10 +8,10 @@ description: Use when the user asks to install, apply, or manage the Claude Code
 为 Claude Code 配置底部状态栏(statusLine),显示:
 
 ```
-模型名 | 当前目录 | git 分支 | ▓░░░░░░░░░ 23k/1m | 5h 24% | 7d 41%
+模型名 | 当前目录 | git 分支 | ▓░░░░░░░░░ 23k/1m | 5h 24% 12:34 | 7d 41% 7/11 10:24
 ```
 
-各段带颜色:模型青、目录蓝、分支绿、进度条与 5h/7d 用量均按百分比 <70% 绿 / 70-89% 黄 / ≥90% 红。`5h`(5 小时窗口)和 `7d`(7 天/周窗口)来自 `rate_limits`,仅对 Claude.ai 订阅者、且本会话首次 API 响应后才出现,缺失时自动省略该段。
+各段带颜色:模型青、目录蓝、分支绿、进度条与 5h/7d 用量均按百分比 <70% 绿 / 70-89% 黄 / ≥90% 红。`5h`(5 小时窗口)和 `7d`(7 天/周窗口)来自 `rate_limits`,仅对 Claude.ai 订阅者、且本会话首次 API 响应后才出现,缺失时自动省略该段。百分比后跟该窗口的重置时刻(本地时间,当天只显示 `HH:MM`,跨天显示 `M/D HH:MM`);`resets_at` 缺失时省略时刻。
 
 > 仅适用于 Claude Code。Codex 的 statusline 机制(`~/.codex/config.toml` 的 `customCommand`)不通过 stdin 传 JSON,本 skill 的脚本不适用于 Codex。
 
@@ -51,8 +51,8 @@ description: Use when the user asks to install, apply, or manage the Claude Code
 | 目录 | 蓝 (34) | `cwd` 的 basename |
 | 分支 | 绿 (32) | `git rev-parse --abbrev-ref HEAD`,无括号;非 git 仓库省略 |
 | 进度条+用量 | 按用量变色 | `context_window.total_input_tokens` / `context_window_size`,10 格,有用量至少 1 格 |
-| 5h 用量 | 按用量变色 | `rate_limits.five_hour.used_percentage`,缺失则省略 |
-| 7d 用量 | 按用量变色 | `rate_limits.seven_day.used_percentage`(7 天/周窗口),缺失则省略 |
+| 5h 用量 | 按用量变色 | `rate_limits.five_hour.used_percentage` + `resets_at` 重置时刻,缺失则省略 |
+| 7d 用量 | 按用量变色 | `rate_limits.seven_day.used_percentage`(7 天/周窗口) + `resets_at` 重置时刻,缺失则省略 |
 
 ## 自定义
 
