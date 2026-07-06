@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Claude Code 底部状态栏(statusLine)
 // 由 my-statusline skill 安装到 ~/.claude/statusline.js
-// 从 stdin 读取 Claude Code 会话 JSON,输出:模型 | 目录 | git 分支 | 上下文用量进度条
+// 从 stdin 读取 Claude Code 会话 JSON,输出:
+//   模型 | 目录 | git 分支 | 上下文用量进度条 | 5h 用量 | 7d 用量
 // 纯 node 内置模块 + git CLI,Win/Linux/Mac 三端通用。
 
 const fs = require("fs");
@@ -46,5 +47,18 @@ parts.push(
     " " + fmt(used) + "/" + fmt(size) +
     reset
 );
+
+// 订阅用量:5 小时窗口与 7 天(周)窗口的已用百分比,配色阈值同上下文进度条。
+// rate_limits 仅对 Claude.ai 订阅者、且本会话首次 API 响应后才出现,
+// 且 five_hour / seven_day 可能各自缺失,所以每段都要判空后再显示。
+const usageSeg = (label, window) => {
+  const p = window?.used_percentage;
+  if (typeof p !== "number") return; // 字段缺失则整段省略
+  const pct = Math.round(p);
+  const c = pct < 70 ? 32 : pct < 90 ? 33 : 31;
+  parts.push(color(c) + label + " " + pct + "%" + reset);
+};
+usageSeg("5h", d.rate_limits?.five_hour);
+usageSeg("7d", d.rate_limits?.seven_day);
 
 process.stdout.write(parts.join(" | "));

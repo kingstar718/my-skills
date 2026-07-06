@@ -8,10 +8,10 @@ description: Use when the user asks to install, apply, or manage the Claude Code
 为 Claude Code 配置底部状态栏(statusLine),显示:
 
 ```
-模型名 | 当前目录 | git 分支 | ▓░░░░░░░░░ 23k/1m
+模型名 | 当前目录 | git 分支 | ▓░░░░░░░░░ 23k/1m | 5h 24% | 7d 41%
 ```
 
-各段带颜色:模型青、目录蓝、分支绿、进度条按用量 <70% 绿 / 70-89% 黄 / ≥90% 红。
+各段带颜色:模型青、目录蓝、分支绿、进度条与 5h/7d 用量均按百分比 <70% 绿 / 70-89% 黄 / ≥90% 红。`5h`(5 小时窗口)和 `7d`(7 天/周窗口)来自 `rate_limits`,仅对 Claude.ai 订阅者、且本会话首次 API 响应后才出现,缺失时自动省略该段。
 
 > 仅适用于 Claude Code。Codex 的 statusline 机制(`~/.codex/config.toml` 的 `customCommand`)不通过 stdin 传 JSON,本 skill 的脚本不适用于 Codex。
 
@@ -34,9 +34,9 @@ description: Use when the user asks to install, apply, or manage the Claude Code
    - 保留 settings.json 其余字段不变,改完确认 JSON 合法。
 4. 用模拟输入验证:
    ```bash
-   echo '{"model":{"display_name":"test"},"cwd":"<某 git 仓库路径>","context_window":{"total_input_tokens":23000,"context_window_size":1000000}}' | <node 路径> ~/.claude/statusline.js
+   echo '{"model":{"display_name":"test"},"cwd":"<某 git 仓库路径>","context_window":{"total_input_tokens":23000,"context_window_size":1000000},"rate_limits":{"five_hour":{"used_percentage":24},"seven_day":{"used_percentage":41}}}' | <node 路径> ~/.claude/statusline.js
    ```
-   应输出带颜色的状态栏一行。
+   应输出带颜色的状态栏一行,末尾含 `5h 24% | 7d 41%`(省略 `rate_limits` 时这两段不显示)。
 5. 告知用户:下次交互后状态栏刷新生效。
 
 ## 卸载
@@ -51,6 +51,8 @@ description: Use when the user asks to install, apply, or manage the Claude Code
 | 目录 | 蓝 (34) | `cwd` 的 basename |
 | 分支 | 绿 (32) | `git rev-parse --abbrev-ref HEAD`,无括号;非 git 仓库省略 |
 | 进度条+用量 | 按用量变色 | `context_window.total_input_tokens` / `context_window_size`,10 格,有用量至少 1 格 |
+| 5h 用量 | 按用量变色 | `rate_limits.five_hour.used_percentage`,缺失则省略 |
+| 7d 用量 | 按用量变色 | `rate_limits.seven_day.used_percentage`(7 天/周窗口),缺失则省略 |
 
 ## 自定义
 
