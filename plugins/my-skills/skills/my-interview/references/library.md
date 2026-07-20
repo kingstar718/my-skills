@@ -8,6 +8,7 @@ my-interview 的题目与答案来自本地 interview-wiki 内容库。本文件
 local_dir: D:\projects\interview-wiki
 git_url: https://github.com/kingstar718/interview-wiki.git
 cache_dir: ~/.my-interview/interview-wiki   # git 回退时的克隆目标
+practice_dir: D:\projects\interview-practice # 练习工作区：代码文件 + profile.md + log.md（个人档案）
 ```
 
 > 首次通过 git 或用户输入拿到有效库后，把实际路径/地址回写到上面对应字段（`local_dir` 指向可用目录、必要时更新 `git_url`），下次直接命中本地。
