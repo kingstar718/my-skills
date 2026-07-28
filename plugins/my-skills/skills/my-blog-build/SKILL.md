@@ -33,7 +33,7 @@ src/content/pages/   # 独立页面（about.md 等）
 ---
 pubDatetime: "2026-07-07 20:00"              # 唯一日期字段，必填，必须加引号
 title: 文章标题                                # 必填
-description: 文章摘要，出现在时间线条目和 RSS 中  # 必填
+description: 一句话摘要，≤45 字             # 必填，见下
 featured: false                              # 是否精选（可选，默认 false）
 draft: false                                 # 草稿不公开（可选）
 aiGenerated: true                            # 正文由 AI 辅助生成（可选，见下）
@@ -47,6 +47,8 @@ updates: []                                  # 更新记录（可选，见第五
 **`pubDatetime` 是全站唯一的日期字段**：排序和页面显示都读这一个值，所以两者永远一致。不存在 `modDatetime`。
 
 格式是 `"YYYY-MM-DD HH:mm"`，**按站点时区（Asia/Shanghai）解读，写的就是页面上显示的值**——不要再手算 UTC 偏移。**必须加引号**：不加引号且带秒的写法会被 YAML 直接解析成时间戳，绕过 schema 的时区处理。写错格式时构建会失败并提示正确写法，不会静默出错。
+
+**`description` 必须 ≤45 字**：它出现在时间线的每一条下面，超过 45 字在 768px 的正文宽度里就会折行，几篇叠在一起首页就糊成一片。schema 有 `max(45)` 校验，超了构建直接失败。写不下说明还没提炼到位——只留这篇最独特的那一点，不要复述标题，也不要罗列全文要点。
 
 **`aiGenerated` 标记正文是否由 AI 辅助生成**：为 `true` 时，时间线和文章页会在标题右侧渲染一个很轻的 `AI` 角标（`src/components/AiBadge.astro`）。**AI 生成或重写正文时必须写 `true`**，人自己写的写 `false` 或省略——两边都要显式表态，不设默认值就是为了避免默认值把哪一边标错。标记不进 `title` 字符串，因此 `<title>`、RSS 标题和 pagefind 索引都不受影响，不要改用在标题里加 `#ai` 之类的写法。
 
@@ -123,6 +125,7 @@ pnpm build        # astro check → astro build → pagefind 索引
 | `pubDatetime 需要加引号` | YAML 把日期解析成了时间戳 | 给值加双引号，并去掉秒 |
 | `pubDatetime 格式应为...` | 用了 ISO 或其他格式 | 改成 `"YYYY-MM-DD HH:mm"`，北京时间 |
 | frontmatter 校验失败 | Zod schema 不匹配 | 检查 `title`/`description` 是否齐全、有无多余字段 |
+| `description 控制在 45 字以内` | 摘要太长 | 精简到 45 字内，时间线上只占一行 |
 | 日期显示或排序不对 | `pubDatetime` 写错 | 全站只有这一个日期字段，排序和显示都读它；日常修改不要动它，改动痕迹由 `updates` 承载 |
 | 图片 404 | 路径错误 | 检查图片是否在 `src/assets/images/` 且引用路径正确 |
 | pagefind 索引异常 | 搜索内容为空 | 确认文章非 draft 且包含正文 |
@@ -168,6 +171,7 @@ git push origin main
 - [ ] `pnpm dev` 预览文章渲染效果
 - [ ] 检查暗色模式下代码块和排版是否正常
 - [ ] frontmatter 只含 schema 里有的字段（没有 `author`/`modDatetime`/`tags`/`timezone`）
+- [ ] `description` ≤45 字，时间线上是一行
 - [ ] `draft: false`（准备公开发布）
 - [ ] `aiGenerated` 与实际情况一致（AI 写的 `true`，人写的 `false`）
 - [ ] 修改文章时 `pubDatetime` **保持不动**（除非是实质重写、确实要顶回时间线顶部）
