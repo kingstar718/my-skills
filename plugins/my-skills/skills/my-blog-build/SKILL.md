@@ -31,7 +31,7 @@ src/content/pages/   # 独立页面（about.md 等）
 
 ```yaml
 ---
-pubDatetime: 2026-07-07T12:00:00Z            # 唯一日期字段（ISO 8601，UTC），必填
+pubDatetime: "2026-07-07 20:00"              # 唯一日期字段，必填，必须加引号
 title: 文章标题                                # 必填
 description: 文章摘要，出现在时间线条目和 RSS 中  # 必填
 featured: false                              # 是否精选（可选，默认 false）
@@ -42,7 +42,9 @@ canonicalURL: https://...                    # 规范链接（可选，通常不
 
 字段以 `src/content.config.ts` 的 Zod schema 为准，schema 里没有的键会被静默丢弃。
 
-**`pubDatetime` 是全站唯一的日期字段**：首次发布时写入，之后每次修改正文也更新它。排序和页面显示都读这一个值，所以两者永远一致。不存在 `modDatetime`。
+**`pubDatetime` 是全站唯一的日期字段**：排序和页面显示都读这一个值，所以两者永远一致。不存在 `modDatetime`。
+
+格式是 `"YYYY-MM-DD HH:mm"`，**按站点时区（Asia/Shanghai）解读，写的就是页面上显示的值**——不要再手算 UTC 偏移。**必须加引号**：不加引号且带秒的写法会被 YAML 直接解析成时间戳，绕过 schema 的时区处理。写错格式时构建会失败并提示正确写法，不会静默出错。
 
 短文（`src/content/notes/`）的 schema 更窄，只有 `pubDatetime`（必填）和 `draft`（可选）——没有 `title`，写了也不会渲染。
 
@@ -79,7 +81,7 @@ canonicalURL: https://...                    # 规范链接（可选，通常不
 
 1. 确认 `src/content/posts/` 下没有同名文件
 2. 按上述 Frontmatter Schema 填写元数据：
-   - `pubDatetime` 取当前 UTC 时间（`new Date().toISOString()`）
+   - `pubDatetime` 取当前北京时间，写成 `"YYYY-MM-DD HH:mm"`（`TZ=Asia/Shanghai date "+%Y-%m-%d %H:%M"`）
    - `draft: false`（如果准备发布）
 3. 正文按 Markdown 写作约定组织
 4. 在文章末尾追加更新记录块（见「五、AI 生成与更新记录」），记录本次创建操作
@@ -113,7 +115,9 @@ pnpm build        # astro check → astro build → pagefind 索引
 
 | 症状 | 原因 | 处理 |
 |------|------|------|
-| frontmatter 校验失败 | Zod schema 不匹配 | 检查 `pubDatetime` 是否为合法日期、`title`/`description` 是否齐全 |
+| `pubDatetime 需要加引号` | YAML 把日期解析成了时间戳 | 给值加双引号，并去掉秒 |
+| `pubDatetime 格式应为...` | 用了 ISO 或其他格式 | 改成 `"YYYY-MM-DD HH:mm"`，北京时间 |
+| frontmatter 校验失败 | Zod schema 不匹配 | 检查 `title`/`description` 是否齐全、有无多余字段 |
 | 日期显示或排序不对 | 忘记更新 `pubDatetime` | 改过正文就要同步更新它，全站只有这一个日期字段 |
 | 图片 404 | 路径错误 | 检查图片是否在 `src/assets/images/` 且引用路径正确 |
 | pagefind 索引异常 | 搜索内容为空 | 确认文章非 draft 且包含正文 |
