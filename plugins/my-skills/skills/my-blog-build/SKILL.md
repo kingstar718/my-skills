@@ -21,8 +21,8 @@ description: 为 astro-paper-blog 生成/修改博客文章并完成构建、校
 
 ```text
 src/content/posts/   # 正式发布的博客文章（.md）
+src/content/notes/   # 短文：一两段的碎片记录，在列表里直接展开，无标题、无详情页
 src/content/pages/   # 独立页面（about.md 等）
-docs/templates/      # 模板参考（不对外发布，draft: true）
 ```
 
 ### Frontmatter Schema
@@ -31,26 +31,22 @@ docs/templates/      # 模板参考（不对外发布，draft: true）
 
 ```yaml
 ---
-author: kingstar718                          # 固定
-pubDatetime: 2026-07-07T12:00:00Z            # 首次发布时间（ISO 8601，UTC）
-modDatetime: 2026-07-07T15:30:00Z            # 最后修改时间（可选，修改文章时更新）
+pubDatetime: 2026-07-07T12:00:00Z            # 唯一日期字段（ISO 8601，UTC），必填
 title: 文章标题                                # 必填
-featured: false                              # 是否精选（默认 false）
-draft: false                                 # 草稿不公开（true/false）
-tags:                                        # 标签数组，至少一个
-  - tag1
-  - tag2
-description: 文章摘要，会出现在卡片和 OG 描述中    # 必填
+description: 文章摘要，出现在时间线条目和 RSS 中  # 必填
+featured: false                              # 是否精选（可选，默认 false）
+draft: false                                 # 草稿不公开（可选）
+canonicalURL: https://...                    # 规范链接（可选，通常不填）
 ---
 ```
 
-### 标签规范
+字段以 `src/content.config.ts` 的 Zod schema 为准，schema 里没有的键会被静默丢弃。
 
-- 标签用小写英文或中文，不用混合语言
-- 技术类：`astro`、`typescript`、`css`、`font`、`markdown`
-- 主题类：`折腾`、`博客`、`阅读`
-- 新增标签时，先在已有文章中 grep 确认是否已存在同义标签
-- 每篇文章标签建议 2-4 个，不宜过多
+**`pubDatetime` 是全站唯一的日期字段**：首次发布时写入，之后每次修改正文也更新它。排序和页面显示都读这一个值，所以两者永远一致。不存在 `modDatetime`。
+
+短文（`src/content/notes/`）的 schema 更窄，只有 `pubDatetime`（必填）和 `draft`（可选）——没有 `title`，写了也不会渲染。
+
+**已经移除、不要再写的字段**：`author`（作者统一取 `astro-paper.config.ts` 的 `site.author`）、`modDatetime`、`tags`、`timezone`（时区统一取站点配置 `Asia/Shanghai`）。
 
 ### Markdown 写作约定
 
@@ -59,7 +55,7 @@ description: 文章摘要，会出现在卡片和 OG 描述中    # 必填
 - **图片**：放 `src/assets/images/`，文章中用 `![alt](/src/assets/images/xxx.png)` 引用
 - **代码块**：必须标记语言 ` ```typescript `，行内代码用单反引
 - **中文排版**：中英文之间加空格；中文语句用全角标点
-- **日期格式**：章节标题用 `## 2026-07-07 — 小节标题` 的格式
+- **日期式章节**（仅「改造日志」这类持续更新的文章）：`##` 是日期本身（`## 2026-07-28`），具体条目用 `###` 作为子标题，按日期倒序排列
 
 ### 写作质量要求
 
@@ -84,7 +80,6 @@ description: 文章摘要，会出现在卡片和 OG 描述中    # 必填
 1. 确认 `src/content/posts/` 下没有同名文件
 2. 按上述 Frontmatter Schema 填写元数据：
    - `pubDatetime` 取当前 UTC 时间（`new Date().toISOString()`）
-   - `modDatetime` 初始与 `pubDatetime` 相同或省略
    - `draft: false`（如果准备发布）
 3. 正文按 Markdown 写作约定组织
 4. 在文章末尾追加更新记录块（见「五、AI 生成与更新记录」），记录本次创建操作
@@ -95,14 +90,7 @@ description: 文章摘要，会出现在卡片和 OG 描述中    # 必填
 1. 读取目标文章的完整内容，理解现有结构和风格
 2. 检查文末是否存在 `<details>` 更新记录块；不存在则新建，存在则在表格首行插入本次记录
 3. 修改正文内容
-4. 更新 `modDatetime` 为当前 UTC 时间
-5. 如果新增了标签，检查是否与已有标签体系一致
-
-### 模板参考
-
-`docs/templates/posts/` 下保留 AstroPaper 原版模板文章（已设 `draft: true`），写作格式或功能用法可参考：
-- `examples/tailwind-typography.md` — 排版功能测试
-- `how-to-update-dependencies.md` — 工具类文章格式
+4. **`pubDatetime` 默认不动**——修改的痕迹由文末的更新记录块承载，日期字段保持文章的发布时间。只有在正文有实质重写、确实希望这篇重新回到时间线顶部时才更新它（例如「改造日志」这类持续更新的文章）。改错别字、修失效引用不要动日期，否则老文章会因为一处小修就顶上首页
 
 ## 三、构建与校验
 
@@ -125,7 +113,8 @@ pnpm build        # astro check → astro build → pagefind 索引
 
 | 症状 | 原因 | 处理 |
 |------|------|------|
-| frontmatter 校验失败 | Zod schema 不匹配 | 检查 `pubDatetime` 是否为 Date 类型、`tags` 是否为数组 |
+| frontmatter 校验失败 | Zod schema 不匹配 | 检查 `pubDatetime` 是否为合法日期、`title`/`description` 是否齐全 |
+| 日期显示或排序不对 | 忘记更新 `pubDatetime` | 改过正文就要同步更新它，全站只有这一个日期字段 |
 | 图片 404 | 路径错误 | 检查图片是否在 `src/assets/images/` 且引用路径正确 |
 | pagefind 索引异常 | 搜索内容为空 | 确认文章非 draft 且包含正文 |
 | `@import must precede` | CSS 加载顺序 | 确认字体加载在 Layout.astro `<head>` 中，不在全局 CSS 中 |
@@ -142,16 +131,15 @@ git add src/content/posts/xxx.md [其他改动文件]
 git diff --cached             # 最后确认暂存内容
 ```
 
-2. Commit message 格式：
+2. Commit message 按 `git-commit-convention` skill 的规范生成，footer 用：
 
 ```text
 <type>(post): <中文简述>
 
-Agent: Claude Code
-Model: <当前模型>
+AI-Generated-By: <Agent 名称及版本> / <模型>
 ```
 
-`type` 按实际操作选择：`feat`（新文章）、`fix`（修正内容）、`refactor`（结构调整）、`chore`（格式/标签修正）。
+`type` 按实际操作选择：`feat`（新文章）、`fix`（修正内容）、`refactor`（结构调整）、`chore`（格式修正）。
 
 3. 文章中必须同步追加更新记录（见第五节），与 commit message 互相对应。
 
@@ -163,17 +151,17 @@ git push origin main
 
 ### 部署
 
-项目无自动部署 workflow（CI 只做 lint + build 校验）。推送后需手动触发部署或使用 Vercel/Railway 等平台的 Git 集成自动部署 `dist/` 目录。
+项目无自动部署 workflow（`.github/workflows/ci.yml` 只做 lint、format:check 和 build 校验）。推送后需手动触发部署或使用 Vercel/Railway 等平台的 Git 集成自动部署 `dist/` 目录。
 
 ### 发布前检查清单
 
 - [ ] 本地 `pnpm build` 通过（0 errors / 0 warnings）
 - [ ] `pnpm dev` 预览文章渲染效果
 - [ ] 检查暗色模式下代码块和排版是否正常
-- [ ] 标签不重复、不与已有同义标签冲突
+- [ ] frontmatter 只含 schema 里有的字段（没有 `author`/`modDatetime`/`tags`/`timezone`）
 - [ ] `draft: false`（准备公开发布）
-- [ ] 修改文章时 `modDatetime` 已更新
-- [ ] commit message 包含 Agent/Model footer
+- [ ] 修改文章时 `pubDatetime` 已更新为当前时间
+- [ ] commit message 包含 `AI-Generated-By` footer
 - [ ] 文末 `<details>` 更新记录块已追加本次操作，`<summary>` 时间已更新
 - [ ] 文章已通读复验（语法、逻辑、术语一致性）
 
@@ -181,13 +169,13 @@ git push origin main
 
 每篇由 AI 创建或修改的文章，必须在文末放置一个可见的更新记录区域。使用 HTML `<details>` 元素实现折叠展开：默认只显示最新一条记录，点击展开后显示全部历史，倒序排列（最新的在最上面）。
 
+**不要在记录块前加 `---` 分割线**，直接以引用行开头。
+
 时间格式统一使用 `YYYY-MM-DD HH:mm:ss`（UTC+8，Asia/Shanghai），精确到秒。
 
 ### 更新记录块格式
 
 ```markdown
----
-
 > 本文部分内容由 AI 辅助生成，以下为更新记录。
 
 <details>
@@ -245,8 +233,6 @@ git push origin main
 ### 示例：仅有一条记录的新文章尾部
 
 ```markdown
----
-
 > 本文由 Claude Code 辅助生成。
 
 <details>
