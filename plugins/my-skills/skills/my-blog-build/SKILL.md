@@ -36,6 +36,7 @@ title: 文章标题                                # 必填
 description: 文章摘要，出现在时间线条目和 RSS 中  # 必填
 featured: false                              # 是否精选（可选，默认 false）
 draft: false                                 # 草稿不公开（可选）
+aiGenerated: true                            # 正文由 AI 辅助生成（可选，见下）
 canonicalURL: https://...                    # 规范链接（可选，通常不填）
 ---
 ```
@@ -46,7 +47,9 @@ canonicalURL: https://...                    # 规范链接（可选，通常不
 
 格式是 `"YYYY-MM-DD HH:mm"`，**按站点时区（Asia/Shanghai）解读，写的就是页面上显示的值**——不要再手算 UTC 偏移。**必须加引号**：不加引号且带秒的写法会被 YAML 直接解析成时间戳，绕过 schema 的时区处理。写错格式时构建会失败并提示正确写法，不会静默出错。
 
-短文（`src/content/notes/`）的 schema 更窄，只有 `pubDatetime`（必填）和 `draft`（可选）——没有 `title`，写了也不会渲染。
+**`aiGenerated` 标记正文是否由 AI 辅助生成**：为 `true` 时，时间线和文章页会在标题右侧渲染一个很轻的 `AI` 角标（`src/components/AiBadge.astro`）。**AI 生成或重写正文时必须写 `true`**，人自己写的写 `false` 或省略——两边都要显式表态，不设默认值就是为了避免默认值把哪一边标错。标记不进 `title` 字符串，因此 `<title>`、RSS 标题和 pagefind 索引都不受影响，不要改用在标题里加 `#ai` 之类的写法。
+
+短文（`src/content/notes/`）的 schema 更窄，只有 `pubDatetime`（必填）和 `draft`（可选）——没有 `title` 也没有 `aiGenerated`，写了也不会渲染。
 
 **已经移除、不要再写的字段**：`author`（作者统一取 `astro-paper.config.ts` 的 `site.author`）、`modDatetime`、`tags`、`timezone`（时区统一取站点配置 `Asia/Shanghai`）。
 
@@ -83,6 +86,7 @@ canonicalURL: https://...                    # 规范链接（可选，通常不
 2. 按上述 Frontmatter Schema 填写元数据：
    - `pubDatetime` 取当前北京时间，写成 `"YYYY-MM-DD HH:mm"`（`TZ=Asia/Shanghai date "+%Y-%m-%d %H:%M"`）
    - `draft: false`（如果准备发布）
+   - `aiGenerated: true`（正文由你生成时；人自己写的写 `false`）
 3. 正文按 Markdown 写作约定组织
 4. 在文章末尾追加更新记录块（见「五、AI 生成与更新记录」），记录本次创建操作
 5. 写完后本地预览验证
@@ -118,7 +122,7 @@ pnpm build        # astro check → astro build → pagefind 索引
 | `pubDatetime 需要加引号` | YAML 把日期解析成了时间戳 | 给值加双引号，并去掉秒 |
 | `pubDatetime 格式应为...` | 用了 ISO 或其他格式 | 改成 `"YYYY-MM-DD HH:mm"`，北京时间 |
 | frontmatter 校验失败 | Zod schema 不匹配 | 检查 `title`/`description` 是否齐全、有无多余字段 |
-| 日期显示或排序不对 | 忘记更新 `pubDatetime` | 改过正文就要同步更新它，全站只有这一个日期字段 |
+| 日期显示或排序不对 | `pubDatetime` 写错 | 全站只有这一个日期字段，排序和显示都读它；日常修改不要动它，改动痕迹由文末更新记录承载 |
 | 图片 404 | 路径错误 | 检查图片是否在 `src/assets/images/` 且引用路径正确 |
 | pagefind 索引异常 | 搜索内容为空 | 确认文章非 draft 且包含正文 |
 | `@import must precede` | CSS 加载顺序 | 确认字体加载在 Layout.astro `<head>` 中，不在全局 CSS 中 |
@@ -164,7 +168,8 @@ git push origin main
 - [ ] 检查暗色模式下代码块和排版是否正常
 - [ ] frontmatter 只含 schema 里有的字段（没有 `author`/`modDatetime`/`tags`/`timezone`）
 - [ ] `draft: false`（准备公开发布）
-- [ ] 修改文章时 `pubDatetime` 已更新为当前时间
+- [ ] `aiGenerated` 与实际情况一致（AI 写的 `true`，人写的 `false`）
+- [ ] 修改文章时 `pubDatetime` **保持不动**（除非是实质重写、确实要顶回时间线顶部）
 - [ ] commit message 包含 `AI-Generated-By` footer
 - [ ] 文末 `<details>` 更新记录块已追加本次操作，`<summary>` 时间已更新
 - [ ] 文章已通读复验（语法、逻辑、术语一致性）
