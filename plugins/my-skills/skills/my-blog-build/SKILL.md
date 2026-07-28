@@ -38,7 +38,7 @@ featured: false                              # 是否精选（可选，默认 fa
 draft: false                                 # 草稿不公开（可选）
 aiGenerated: true                            # 正文由 AI 辅助生成（可选，见下）
 canonicalURL: https://...                    # 规范链接（可选，通常不填）
-updates: []                                  # 文末更新记录（可选，见第五节）
+updates: []                                  # 更新记录（可选，见第五节）
 ---
 ```
 
@@ -123,7 +123,7 @@ pnpm build        # astro check → astro build → pagefind 索引
 | `pubDatetime 需要加引号` | YAML 把日期解析成了时间戳 | 给值加双引号，并去掉秒 |
 | `pubDatetime 格式应为...` | 用了 ISO 或其他格式 | 改成 `"YYYY-MM-DD HH:mm"`，北京时间 |
 | frontmatter 校验失败 | Zod schema 不匹配 | 检查 `title`/`description` 是否齐全、有无多余字段 |
-| 日期显示或排序不对 | `pubDatetime` 写错 | 全站只有这一个日期字段，排序和显示都读它；日常修改不要动它，改动痕迹由文末更新记录承载 |
+| 日期显示或排序不对 | `pubDatetime` 写错 | 全站只有这一个日期字段，排序和显示都读它；日常修改不要动它，改动痕迹由 `updates` 承载 |
 | 图片 404 | 路径错误 | 检查图片是否在 `src/assets/images/` 且引用路径正确 |
 | pagefind 索引异常 | 搜索内容为空 | 确认文章非 draft 且包含正文 |
 | `@import must precede` | CSS 加载顺序 | 确认字体加载在 Layout.astro `<head>` 中，不在全局 CSS 中 |
@@ -178,7 +178,7 @@ git push origin main
 ## 五、AI 生成与更新记录
 
 每篇由 AI 创建或修改的文章，都要在 frontmatter 的 `updates` 数组里追加一条记录。
-它是元数据，**不写在正文里**——`src/components/PostUpdates.astro` 会把它渲染成文末一个可折叠的列表。
+它是元数据，**不写在正文里**——`src/components/PostUpdates.astro` 会把它渲染成文章标题下方元信息行里的一个折叠块，与日期、目录并排（收起时只是一行「▸ 更新记录（N 条）」，展开才铺开列表）。
 
 正文里不要再出现 `<details>` 更新记录块、`📝` 图标，也不要写「本文部分内容由 AI 辅助生成」这类提示行：AI 标记已经由 `aiGenerated` 在标题旁呈现，重复了。
 
@@ -233,4 +233,5 @@ updates:
 - 字体方案：自托管 Noto 变量字体（`Noto Serif Variable` / `Noto Serif SC Variable` / `Noto Sans Mono Variable`），unicode-range 分包
 - 字体文件位于 `public/fonts/`，样式入口在 `src/layouts/Layout.astro` 的 `<head>`
 - 自定义样式在 `src/styles/` 中修改，主题色变量在 `src/styles/theme.css`
+- 代码块的语法高亮配色是 `vitesse-light` / `vitesse-dark`（`astro.config.ts` 的 `shikiConfig`）；底色不取主题自带的纯白/纯黑，走 `theme.css` 的 `--code-background`
 - 任何涉及字体加载顺序的改动，必须在 `pnpm build` 后检查是否有 CSS `@import` 顺序警告
