@@ -57,11 +57,14 @@ AI-Generated-By: <Agent 名称及版本> / <模型>
 
 按当前运行环境选择探测方式：
 
-- Codex：Agent 记为 `Codex CLI`，使用 `codex --version` 获取版本；模型优先使用当前会话信息，其次读取当前生效的 Codex 配置。
+- Codex：Agent 记为 `Codex CLI`，使用 `codex --version` 获取版本；模型名称按以下优先级解析：
+  1. 当前会话/运行时的真实模型标识：优先读取 `~/.codex/state_5.sqlite` 的 `threads` 表（`model`、`model_provider` 字段，匹配最近更新的当前会话记录），或 `codex exec` JSON 输出等运行时元数据；
+  2. 当前生效的 Codex 配置：解析 `config.toml` 的 `model_provider` + `model`；
+  3. 仍无法可靠获取时写 `unknown`。
 - Claude Code：Agent 记为 `Claude Code`，使用 `claude --version` 获取版本；模型优先使用当前会话信息，其次读取当前生效的 Claude Code 配置。
 - 其他 Agent：使用运行环境明确提供的名称和模型；优先通过该 Agent 自身的版本命令获取版本，其次读取其当前生效配置。
 
-不得根据产品默认值猜测。某一项无法可靠获取时写 `unknown`，不要用其他工具、Git 用户身份或推测值补齐。会话缓存只保留在当前对话上下文中，不写入仓库或全局配置。
+系统提示或产品话术中的泛化表述（如 "based on X"）不作为模型标识；不得根据产品默认值猜测，不得用其他工具、Git 用户身份或推测值补齐。某一项无法可靠获取时写 `unknown`。会话缓存只保留在当前对话上下文中，不写入仓库或全局配置。
 
 示例：
 
