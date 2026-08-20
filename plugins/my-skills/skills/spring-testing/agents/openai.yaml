@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spring 项目测试方案"
+  short_description: "Spring 项目测试分层、Testcontainers、切片与 E2E 测试组织"
+  default_prompt: "为这个 Spring 项目设计并落地测试分层（单测/切片/集成/E2E）"

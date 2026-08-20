@@ -1,7 +1,7 @@
 {
   "name": "my-skills",
   "version": "1.7.0",
-  "description": "个人 Git 工作流 Skill 集合",
+  "description": "个人 Git 工作流与测试 Skill 集合",
   "author": {
     "name": "kingstar718",
     "email": "wujinxing@sf-express.com",
@@ -12,7 +12,10 @@
   "keywords": [
     "git",
     "conventional-commits",
-    "workflow"
+    "workflow",
+    "testing",
+    "spring",
+    "testcontainers"
   ],
   "skills": "./skills/",
   "interface": {
