@@ -11,8 +11,8 @@
   "plugins": [
     {
       "name": "my-skills",
-      "description": "个人 Claude Code skill 集合（含 git-commit-convention、spring-testing 等）",
-      "version": "1.8.0",
+      "description": "个人 Claude Code skill 集合：环境与失败日志、Git 提交规范、Spring 测试分层、博客发布、面试教练、状态栏",
+      "version": "1.9.1",
       "source": "./",
       "tags": ["personal", "skills", "conventional-commits", "testing"]
     }

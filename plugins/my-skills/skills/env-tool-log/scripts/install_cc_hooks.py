@@ -14,6 +14,11 @@ MARKER = "env-tool-log/scripts/cc_hooks.py"
 def build_hooks(python_exe: str) -> dict:
     cmd = f'"{python_exe}" "{CC_HOOKS_SCRIPT}"'
     return {
+        # PostToolUse 对成功/失败都触发（含 Bash 非零退出），matcher 留空覆盖
+        # 全部工具（Glob 超时等非 Bash 失败也能捕获），由 cc_hooks.py 依据
+        # transcript 的 tool_result.is_error 过滤出失败。
+        "PostToolUse": [{"hooks": [{"type": "command", "command": cmd}]}],
+        # 官方事件列表无 PostToolUseFailure，注册仅为兼容可能支持它的版本。
         "PostToolUseFailure": [{"matcher": "Bash", "hooks": [{"type": "command", "command": cmd}]}],
         "PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": cmd}]}],
         "SessionStart": [{"hooks": [{"type": "command", "command": cmd}]}],

@@ -160,7 +160,9 @@ def prune(older_days: int = 90, max_entries: int = 500) -> dict:
             key=lambda e: e.get("ts", ""),
         )
         overflow = fixed[: len(keep) - max_entries]
-        keep = [e for e in keep if e not in overflow]
+        # 按 id() 而非内容过滤：内容完全相同的记录只删溢出部分，不连带误删
+        overflow_ids = {id(e) for e in overflow}
+        keep = [e for e in keep if id(e) not in overflow_ids]
         archived.extend(overflow)
     if archived:
         with open(archive_path(), "a", encoding="utf-8") as f:

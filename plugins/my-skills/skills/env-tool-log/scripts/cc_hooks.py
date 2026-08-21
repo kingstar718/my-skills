@@ -59,15 +59,66 @@ def block_rules():
     return [ln for _, ln in load_rules() if ln.startswith("- [BLOCK]")]
 
 
+def response_text(tool_response) -> str:
+    """tool_response 可能是 dict（Bash 为 stdout/stderr）或字符串，统一提取文本。"""
+    if isinstance(tool_response, dict):
+        parts = []
+        for key in ("error", "stderr", "stdout"):
+            v = tool_response.get(key)
+            if isinstance(v, str) and v.strip():
+                parts.append(clean(v))
+        return " ".join(parts)
+    if isinstance(tool_response, str):
+        return clean(tool_response)
+    return ""
+
+
+def is_last_tool_result_error(transcript_path) -> bool:
+    """读 transcript 尾部，返回最后一条 tool_result 的 is_error。
+
+    hook 输入的 tool_response 无可靠失败标志，transcript JSONL 的
+    tool_result 条目带 is_error；读取失败一律按非失败处理（宁漏勿误记）。
+    """
+    if not transcript_path:
+        return False
+    try:
+        with open(transcript_path, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            size = f.tell()
+            f.seek(max(0, size - 65536))
+            tail = f.read().decode("utf-8", errors="replace")
+    except OSError:
+        return False
+    for line in reversed(tail.splitlines()):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            entry = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        content = (entry.get("message") or {}).get("content")
+        if not isinstance(content, list):
+            continue
+        for item in content:
+            if isinstance(item, dict) and item.get("type") == "tool_result":
+                return bool(item.get("is_error"))
+    return False
+
+
 def event_add_failure(data: dict) -> None:
     tool_name = data.get("tool_name", "")
     tool_input = data.get("tool_input", {})
-    error = clean(data.get("tool_response") or data.get("error") or "")
+    error = response_text(data.get("tool_response")) or clean(data.get("error") or "")
     if tool_name == "Bash":
         cmd = tool_input.get("command", "")
     else:
-        path = tool_input.get("file_path") or tool_input.get("path") or tool_input.get("pattern") or ""
-        cmd = f"{tool_name} {path}".strip()
+        parts = [tool_name]
+        for key in ("file_path", "path", "pattern", "url"):
+            v = tool_input.get(key)
+            if isinstance(v, str) and v:
+                parts.append(f"{key}={v}")
+        cmd = " ".join(parts)
     if not cmd and not error:
         return
     sig = (error[:200] or cmd[:120]) or "unknown failure"
@@ -77,6 +128,17 @@ def event_add_failure(data: dict) -> None:
         "category": detect_category(error),
         "from": "cc",
     })
+
+
+def event_post_tool_use(data: dict) -> None:
+    """PostToolUse 对成功/失败都触发：先判失败，仅失败才记录。"""
+    tool_response = data.get("tool_response")
+    if isinstance(tool_response, dict) and (tool_response.get("is_error") or tool_response.get("error")):
+        failed = True
+    else:
+        failed = is_last_tool_result_error(data.get("transcript_path"))
+    if failed:
+        event_add_failure(data)
 
 
 def event_pre_tool_use(data: dict) -> None:
@@ -169,7 +231,10 @@ def main() -> None:
     except (json.JSONDecodeError, OSError):
         sys.exit(0)
     event = data.get("hook_event_name", "")
-    if event == "PostToolUseFailure":
+    if event == "PostToolUse":
+        event_post_tool_use(data)
+    elif event == "PostToolUseFailure":
+        # 官方事件列表无此事件；若某版本支持则直接记录，同 sig 去重防双写
         event_add_failure(data)
     elif event == "PreToolUse":
         event_pre_tool_use(data)

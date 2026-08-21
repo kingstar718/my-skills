@@ -43,12 +43,12 @@ python scripts/fail_log.py lessons [--apply]
 
 ## Claude Code hooks
 
-- `PostToolUseFailure`（Bash）：失败自动记录，category 用错误文本启发式猜测。
+- `PostToolUse`（全部工具）：成功/失败都会触发，cc_hooks.py 读 transcript 最后一条 tool_result 的 `is_error` 判定失败，仅失败才记录；覆盖非 Bash 工具错误（如 Glob 超时）。
 - `PreToolUse`（Bash）：命中 `[BLOCK]` 规则时 deny 并给原因。
 - `SessionStart`：注入环境快照异常、未解决失败（最多 5 条）、教训（前 10 行）。
 - `UserPromptSubmit`：提示词命中工具名时注入对应规则。
 - 安装：`python scripts/install_cc_hooks.py`（写 `~/.claude/settings.json`，使用绝对路径，不依赖 CLAUDE_PLUGIN_ROOT）；`--print` 预览；`--uninstall` 移除；`--scope project` 写项目级 `.claude/settings.local.json`。
-- 若 CC 版本不支持 `PostToolUseFailure` 事件，改用 `PostToolUse` 解析 `tool_response` 失败文本；同 sig 去重兜底防双写。
+- `PostToolUseFailure` 并非官方事件（官方列表无此项），注册仅为兼容可能支持它的版本；与 `PostToolUse` 双触发时同 sig 去重防双写。
 
 ## 隐私
 
