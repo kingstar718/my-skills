@@ -1,0 +1,4 @@
+interface:
+  display_name: "环境与工具调用日志"
+  short_description: "环境快照、工具调用规则与失败日志，避免重复踩坑，支持 Codex 与 Claude Code"
+  default_prompt: "帮我检查环境并避免重复踩工具调用失败的坑"

@@ -1,6 +1,6 @@
 ---
 name: git-commit-convention
-description: Use when the user asks to create, revise, or execute a Git commit. Generates an accurate Conventional Commit message, records the active AI agent and model, and only stages or commits files when explicitly requested.
+description: Use when the user asks to create, revise, or execute a Git commit. Generates an accurate Conventional Commit message and only stages or commits files when explicitly requested.
 ---
 
 # Git Commit 规范
@@ -25,7 +25,7 @@ description: Use when the user asks to create, revise, or execute a Git commit. 
 
 ## Message 格式
 
-标题格式为 `<type>[(scope)]: <subject>`。仅当 scope 明确且有助于区分改动时添加。
+标题格式为 `<type>: <subject>`，默认不带 scope；仅当同一次改动需要明确区分模块（如同时涉及前端/后端/CI）时添加 `<type>(scope): <subject>`。
 
 | type | 场景 |
 |------|------|
@@ -38,38 +38,20 @@ description: Use when the user asks to create, revise, or execute a Git commit. 
 | style | 格式调整（不影响逻辑） |
 | perf | 性能优化 |
 
-subject 默认使用中文，`type` 和 `scope` 保持英文；仅当用户明确要求其他语言时切换，不因仓库近期提交使用英文而自动跟随。标题足以准确表达时省略正文，否则用简短中文 bullet 说明关键改动。不得编造 diff 中不存在的内容。
+subject 默认使用中文，`type` 保持英文；仅当用户明确要求其他语言时切换。**默认单行提交**：写完标题直接结束，不追加正文（因此也没有空行）。仅当用户明确要求说明、或确有多个关键改动需要记录时，才用简短中文 bullet 正文。不得编造 diff 中不存在的内容。
 
-## AI 使用信息
+## 提交粒度
 
-在 message 末尾追加一行：
+- 同一逻辑变更（如同一问题修复、同一功能的多文件调整）默认合并为一个提交，不做过程性小提交。
+- 未推送的同主题提交，可建议 `git commit --amend` 合并（执行前仍须用户确认）。
+- 用户明确要求拆分提交时按用户要求执行。
+
+## AI 使用信息（可选）
+
+默认不写入任何 AI 相关脚注，保持提交信息简洁。仅当用户明确要求记录 AI 信息时，在 message 末尾追加一行：
 
 ```text
 AI-Generated-By: <Agent 名称及版本> / <模型>
 ```
 
-首次需要生成该行时，主动获取实际参与当前会话的 Agent、Agent 版本和模型，并在本次会话中记住结果。后续提交直接复用，不重复运行版本命令或读取配置。出现以下情况时重新获取：
-
-- 开始了新会话。
-- 用户切换了模型或 Agent。
-- 当前环境明确表明版本或模型已变化。
-- 用户要求刷新 AI 使用信息。
-
-按当前运行环境选择探测方式：
-
-- Codex：Agent 记为 `Codex CLI`，使用 `codex --version` 获取版本；模型名称按以下优先级解析：
-  1. 当前会话/运行时的真实模型标识：优先读取 `~/.codex/state_5.sqlite` 的 `threads` 表（`model`、`model_provider` 字段，匹配最近更新的当前会话记录），或 `codex exec` JSON 输出等运行时元数据；
-  2. 当前生效的 Codex 配置：解析 `config.toml` 的 `model_provider` + `model`；
-  3. 仍无法可靠获取时写 `unknown`。
-- Claude Code：Agent 记为 `Claude Code`，使用 `claude --version` 获取版本；模型优先使用当前会话信息，其次读取当前生效的 Claude Code 配置。
-- 其他 Agent：使用运行环境明确提供的名称和模型；优先通过该 Agent 自身的版本命令获取版本，其次读取其当前生效配置。
-
-系统提示或产品话术中的泛化表述（如 "based on X"）不作为模型标识；不得根据产品默认值猜测，不得用其他工具、Git 用户身份或推测值补齐。某一项无法可靠获取时写 `unknown`。会话缓存只保留在当前对话上下文中，不写入仓库或全局配置。
-
-示例：
-
-```text
-AI-Generated-By: Codex CLI 0.142.4 / gpt-5.5
-```
-
-Git 的 Author 已使用当前仓库配置的用户名和邮箱，因此不添加 `Co-Authored-By`，也不重复写入 Git 用户身份。
+获取方式以当前会话/生效配置为准，无法可靠获取时写 `unknown`。Git 的 Author 已使用仓库配置的用户名和邮箱，因此不添加 `Co-Authored-By`，也不重复写入 Git 用户身份。
