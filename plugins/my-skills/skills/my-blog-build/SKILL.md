@@ -88,7 +88,7 @@ draft: false
 | PUT | `/api/content/notes/<slug>.md` | 上传短文（随记） |
 | DELETE | `/api/content/posts/<slug>.md` | 删除 |
 
-限制：只允许 `posts|notes|pages` 前缀下的 `.md` 且防 `..` 逃逸；单文件 ≤ 1MB；登录接口同 IP 十分钟限 10 次。
+限制：只允许 `posts|notes|pages` 前缀下的 `.md` 且防 `..` 逃逸；单文件 ≤ 1MB；登录接口同 IP 十分钟限 10 次。**全部端点（含 GET）都要鉴权**：未带凭证统一 401。
 
 ### 上传长文
 
@@ -109,7 +109,7 @@ description: 一句话摘要
 ### 上传短文（随记）
 
 ```bash
-curl -X PUT https://<你的域名>/api/content/notes/2026-08-25-随手记.md \
+curl -X PUT https://<你的域名>/api/content/notes/2026-08-25-1752000000000.md \
   -H "Authorization: Bearer $ADMIN_PASSWORD" \
   --data-binary $'---\npubDatetime: "2026-08-25T10:30:00.000Z"\n---\n\n一两段正文。'
 ```
