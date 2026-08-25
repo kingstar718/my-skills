@@ -35,6 +35,14 @@ description: "Design and implement layered tests for Spring (Boot) projects: pur
 4. 写 Tier 3 集成：Testcontainers 容器 + 动态属性注入 + bean 覆盖。见 [testcontainers-integration.md](references/testcontainers-integration.md)。
 5. 写 E2E：单文件 pytest 黑盒。见 [e2e-pytest.md](references/e2e-pytest.md)。
 
+## 工程约定
+
+- 测试默认执行：不要硬编码 surefire `skipTests`；`mvn test` 直接跑测试，打包/CI 用 `-Dmaven.test.skip=true` 跳过。
+- 含 JUnit5 测试的模块须显式指定 surefire 2.22+（Maven 默认 2.12 不识别 JUnit5，测试会静默不跑）。
+- log4j2 项目里 `spring-boot-starter-test` 需排除 `log4j-to-slf4j` 与 logback（classic/core），否则单测/切片启动报日志冲突。
+- 用例可读性：描述性方法名 + 用例 Javadoc（放在 `@Test` 之前）写明“场景 + 预期结果”，类级 Javadoc 说明覆盖范围；E2E 用 docstring 说明测什么。
+- 依赖 Spring 上下文的响应工厂（如 graceful-response `RestResult`）不能用于纯单测：校验/映射逻辑收敛为返回枚举或纯值的可单测方法，`RestResult` 组装交给切片测试。
+
 ## 验收标准
 
 - 单测/切片秒级、零外部依赖；集成测试 schema 与生产 DDL 对齐；E2E 环境不可达时可见跳过（不静默假绿）。
