@@ -11,6 +11,7 @@
 - `my-interview`：交互式面试教练，基于本地 interview-wiki 题库（290+ 算法题解 + 后端八股），练习/模拟面试双模式。
 - `my-statusline`：为 Claude Code 配置底部状态栏(模型 | 目录 | git 分支 | 上下文用量进度条 | 5h/7d 订阅用量)，`/my-statusline` 应用。
 - `spring-testing`：为 Spring (Boot) 项目设计并落地分层测试（单测 / WebMvc 切片 / Testcontainers 集成 / pytest E2E），含无 Docker 时的降级方案。
+- `spec-coding`：Spec Coding（规范驱动开发）需求跟进——单文件 spec（状态/验收标准 EARS/设计要点/任务清单/TDD/回归），测试先行（红→绿）实现。
 
 ## Codex 安装
 
