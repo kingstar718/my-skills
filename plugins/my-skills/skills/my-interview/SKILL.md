@@ -134,10 +134,11 @@ javac -encoding UTF-8 P1TwoSum.java && java P1TwoSum
 本地测试全绿后，可问用户「要不要提交到 LeetCode 验隐藏用例」，同意才做：
 
 1. 读 [references/submit.md](references/submit.md)（cookie 获取、Solution 转换规则、用法）。
-2. 把练习文件转成 `class Solution` 形式（删 `main` 与自测辅助类），作为新文件写入练习工作区。
+2. 把练习文件转成 `class Solution` 形式（删 `main` 与自测辅助类）。**Solution 是临时产物：交完即删、不入库**，不重复生成双文件常驻。
 3. 运行 `python <skill目录>/scripts/leetcode_submit.py --slug <题slug> --file <Solution文件>`（默认 leetcode.cn）。
 4. 按退出码与输出反馈：AC 记入 log.md；未过则结合判题输出讲解并回写薄弱点。
 5. cookie 失效/网络失败 → 提示用户重取 cookie，不阻塞本地练习。
+6. **AC 判定与收尾（interview-wiki 惯例，工作区存在 `刷题进度.md` 时适用）**：AC = 骨架自测 + 额外用例 + LC 提交全过（力度每次临时定）；提交后按内容库 `content/algorithms/刷题方案.md`「单题怎么刷」的收尾三步同步——勾 `刷题进度.md` → 同步 `practice/README.md` 速查表与对应行 ✅ → 一次 `docs:` 提交带齐（不 push）。无此目录结构时跳过。
 
 ## 用户指令表
 
