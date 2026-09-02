@@ -35,7 +35,7 @@ description: 交互式面试教练。基于本地 interview-wiki 题库出题、
 
 ## 个人档案（跨会话）
 
-在**练习工作区** `practice_dir`（默认 `D:\projects\interview-practice`，可配置，见 library.md）维护两份文件，让教练"记得住"用户：
+在**练习工作区** `practice_dir`（默认 `D:\projects\interview-wiki\practice`，可配置，见 library.md）维护两份文件，让教练"记得住"用户：
 
 | 文件 | 内容 | 读写时机 |
 |------|------|---------|
@@ -70,7 +70,7 @@ description: 交互式面试教练。基于本地 interview-wiki 题库出题、
 3. **生成代码框架**：见下方「代码框架与本地测试」。核心逻辑处标 `TODO`。
 4. **用户写码**：等待用户填充 `TODO`。卡住可说"提示"。
 5. **测试**：用本地 Java 编译运行自测（见下）。反馈通过/失败用例。
-6. **迭代**：让用户改到全绿。
+6. **迭代**：让用户改到全绿。本地全绿后，可问用户是否提交真实 OJ（见「LeetCode 提交（可选）」）。
 7. **讲解**：全绿或用户放弃后，读该题**题解九节**（题目→思路→代码→复杂度→边界条件→变式→易错点→面试追问→关联题），据此讲：最优解、复杂度、关键思路、与用户解法对比、易错点。
 8. **关联与下一题**：引用题解「关联题」段推荐进阶/易混题，进入下一题。
 
@@ -128,6 +128,16 @@ javac -encoding UTF-8 P1TwoSum.java && java P1TwoSum
 - 回读 stdout 判定通过情况，把失败用例反馈给用户。
 - 编译错误/运行异常原样转达（截断过长栈）。
 - **缺 JDK 兜底**：`javac`/`java` 不可用时，改为把文件给用户、引导其本地运行，不阻塞流程。
+
+## LeetCode 提交（可选）
+
+本地测试全绿后，可问用户「要不要提交到 LeetCode 验隐藏用例」，同意才做：
+
+1. 读 [references/submit.md](references/submit.md)（cookie 获取、Solution 转换规则、用法）。
+2. 把练习文件转成 `class Solution` 形式（删 `main` 与自测辅助类），作为新文件写入练习工作区。
+3. 运行 `python <skill目录>/scripts/leetcode_submit.py --slug <题slug> --file <Solution文件>`（默认 leetcode.cn）。
+4. 按退出码与输出反馈：AC 记入 log.md；未过则结合判题输出讲解并回写薄弱点。
+5. cookie 失效/网络失败 → 提示用户重取 cookie，不阻塞本地练习。
 
 ## 用户指令表
 
