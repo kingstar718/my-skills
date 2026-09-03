@@ -6,6 +6,8 @@
 
 浏览器登录 leetcode.cn → F12 → Application → Cookies → 复制 `LEETCODE_SESSION` 与 `csrftoken` 的值。三种给法任选：
 
+0. **扫码登录自动抓取（推荐，免 F12）**：在本机（能弹浏览器的环境）运行 `python <skill目录>/scripts/leetcode_cookie_login.py`，弹出 chromium 窗口扫码/登录，登录成功后自动把 cookie 存入 `~/.my-interview/leetcode_cookies.json`（权限 600），之后提交脚本自动读取，无需再传参数。依赖：`pip install playwright && python3 -m playwright install chromium`。无显示环境（如远程容器）不能弹窗，请在本地机运行。
+
 1. **整段粘贴（最简单）**：把浏览器复制的整段 Cookie 字符串给教练，用 `--cookie "..."` 传入，脚本自动提取 `LEETCODE_SESSION` 与 `csrftoken`。也可用 `--session` / `--csrf` 或 `LEETCODE_SESSION` / `LEETCODE_CSRFTOKEN` 环境变量单独传，单次命令用完即弃、不落盘。
 2. **交互式粘贴**：直接运行脚本，提示时粘贴（不回显），值不经过命令行和文件。
 3. **配置文件（持久）**：写入 `~/.my-interview/leetcode_cookies.json`：
@@ -24,6 +26,7 @@
 LeetCode 只接受 `class Solution { ... }`，不能含 `main` 与自测辅助类。转换规则：
 
 - 练习文件 `P27RemoveElement.java` → 生成提交文件：类名改 `Solution`、保留解题方法、删 `main`/辅助方法。
+- **链表/树等带自定义结构的题（ListNode/TreeNode 等）**：判题环境已注入这些结构定义，Solution 文件里**不要重复定义**——重复定义会编译失败，表现在判题输出为 `Runtime Error | passed=0/N`（203 真实踩过）。练习文件里的 ListNode/TreeNode 是本地自测用的，转 Solution 时随 main 一起删掉。
 - 含中文注释一般可提交；若报编译编码错误，去掉注释再交。
 
 ## 用法
