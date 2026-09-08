@@ -9,7 +9,7 @@ description: "按 Spec Coding（规范驱动开发）跟进需求：每个需求
 
 ## 流程
 
-1. 登记：新需求在 `docs/` 建 `xxx需求.md`（单文件模板见 [assets/spec-template.md](assets/spec-template.md)，完整示例见 [assets/spec-example.md](assets/spec-example.md)），同时在需求登记表加一行，状态 `规划中`。登记表默认 `docs/project.md`，以仓库 AGENTS.md 指定为准（部分仓库用 `docs/projects-status.md`，沿用既有表头与编号如 R-xx）。
+1. 登记：新需求在 `docs/` 建 `xxx需求.md`（单文件模板见 [assets/spec-template.md](assets/spec-template.md)，完整示例见 [assets/spec-example.md](assets/spec-example.md)），同时在需求登记表加一行，状态 `规划中`。登记表默认 `docs/project.md`，以仓库 AGENTS.md/CLAUDE.md 指定为准（实际存在三种形态：`docs/projects-status.md`、`doc/project-status.md`、根目录 `status.md`，沿用既有表头与编号如 R-xx）。
 2. 定稿：spec 中 `待确认项` 全部确认后，状态转 `开发中`，之后才允许动代码。
 3. 测试先行：按 `需求与验收标准` 逐条写单测，现有实现下先跑红，再实现到绿。
 4. 回归：把单测/打包/真实环境结果写进 `回归清单`；真实环境通过后状态转 `已上线`。状态语义补充：测试/SIT 环境通过但未上生产，保持 `待回归` 并注明部署收尾；真实环境不可主动触发（限流码、故障码等）时，回归清单注明“以单测为准，上线后随真实流量观察”。
@@ -34,5 +34,7 @@ description: "按 Spec Coding（规范驱动开发）跟进需求：每个需求
 - 入参约束要明确：格式、数量上限、长度上限（防穷举/防超长）。
 - 需求变更 = 先改 spec 再改代码，并补回归用例；commit message 引用 spec 文件名。
 - 复制型/多仓库需求：登记表/回归清单记录“镜像仓库与同步状态”，spec 注明先落点仓库与后续铺开范围，避免漏同步。
+- 状态文档位置偏离时（目录单复数、文件名不同、根目录 vs docs/）：不静默沿用、也不擅自改，提示用户评估统一（更名/移动或确认沿用既有惯例）；若统一，`git mv` 保留历史并全仓 grep 同步引用（AGENTS.md/CLAUDE.md、spec 的「登记：」行、e2e docstring 中的路径）。AGENTS.md 有明文约定的偏离（如「只维护根目录 status.md」）视为既有决策，沿用即可。
+- 入口文件双轨制（AGENTS.md 为源，CLAUDE.md 为兼容引用入口，单源防漂移）：仓库只有 CLAUDE.md 时，提示创建 AGENTS.md 并迁移内容、CLAUDE.md 改为指向引用；只有 AGENTS.md 时，提示创建 CLAUDE.md 引用入口；两份并存且内容重复时，提示收敛为单源 + 引用。
 - 构建环境、工具链等约定不进 spec，放 AGENTS.md。
 - 文件命名：`docs/xxx需求.md` 或 `xxx接口文档.md`，一个需求一份。

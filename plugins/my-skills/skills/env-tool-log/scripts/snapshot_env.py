@@ -73,6 +73,39 @@ def run_version(name: str, args: list) -> dict:
         return {"version": None, "error": "timeout"}
 
 
+def _local_repo_from_settings(settings_path: str):
+    try:
+        with open(settings_path, encoding="utf-8", errors="replace") as f:
+            m = re.search(r"<localRepository>\s*([^<]+?)\s*</localRepository>", f.read())
+            if m:
+                return os.path.expanduser(os.path.expandvars(m.group(1).strip()))
+    except OSError:
+        pass
+    return None
+
+
+def maven_local_repository():
+    """探测 Maven 本地仓库：user settings.xml 优先，其次 MAVEN_HOME/M2_HOME
+    conf/settings.xml，最后默认位置。机器级路径只用于本机快照，不写死进共享规则。"""
+    home = os.path.expanduser("~")
+    user_profile = os.environ.get("USERPROFILE", home)
+    candidates = []
+    if os.name == "nt":
+        candidates.append(os.path.join(user_profile, ".m2", "settings.xml"))
+    candidates.append(os.path.join(home, ".m2", "settings.xml"))
+    m2 = os.environ.get("MAVEN_HOME") or os.environ.get("M2_HOME")
+    if m2:
+        candidates.append(os.path.join(m2, "conf", "settings.xml"))
+    for settings in candidates:
+        if os.path.exists(settings):
+            repo = _local_repo_from_settings(settings)
+            if repo:
+                return repo
+    default = os.path.join(user_profile, ".m2", "repository") if os.name == "nt" \
+        else os.path.join(home, ".m2", "repository")
+    return default if os.path.isdir(default) else None
+
+
 def probe(tools: list) -> dict:
     result = {"tools": {}}
     for name in tools:
@@ -85,6 +118,7 @@ def probe(tools: list) -> dict:
         result["tools"][name] = info
     env = {var: os.environ[var] for var in ENV_VARS if os.environ.get(var)}
     result["env"] = env
+    result["maven"] = {"localRepository": maven_local_repository()}
     result["path"] = os.environ.get("PATH", "").split(os.pathsep)
     return result
 

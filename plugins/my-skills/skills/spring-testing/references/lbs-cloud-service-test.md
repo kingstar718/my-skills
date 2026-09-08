@@ -1,6 +1,6 @@
 # lbs-cloud（SF 内部框架）服务测试与本地启动
 
-适用：依赖 `com.sf.lbs.cloud.*`（lbs-cloud 3.8.x、Spring Boot 2.7、Nacos、Retrofit）的代理服务，典型为 `gis-rss-ips-*` 高德代理族（place-around / place-around-pro / place-text / place-text-pro / tip-gd 等）。
+适用：依赖 `com.sf.lbs.cloud.*`（lbs-cloud 3.8.x、Spring Boot 2.7、Nacos、Retrofit）的高德 Web 服务代理类项目。
 
 ## 一、本地启动（验证/冒烟）
 
@@ -21,30 +21,48 @@
 
 可脱离 Spring 验证的逻辑（URL 构建、字符串处理等）优先抽成包级/静态方法（如 `buildPlaceAroundV5Url`），测试零 Spring、秒级。
 
-### 2. graceful-response 静态工厂需要最小上下文
+### 2. graceful-response 静态工厂需要最小上下文（Tier 1.5，已实测）
 
-`RestResult.newErr/newSuccess` 与 `Response`/`BaseResponse` 依赖 `ApplicationContextProvider` 等 Spring bean，无法在无上下文时断言。此类测试（infocode 分流、错误映射）在 `core` 使用最小 `TestConfiguration`，不启动 Nacos、不连外部服务：
+`RestResult.newErr/newSuccess` 内部走 `ApplicationContextProvider.getBean(...)`（该类 `implements ApplicationContextAware`，静态持有容器），无上下文即抛错，无法纯单测。需要断言「错误码/msg 组装正确性」（infocode 分流、错误映射）时，在 `core` 起最小上下文，不启动 Nacos/Redis/Web（实测 6 用例约 3s）：
 
 ```java
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = XxxTest.TestConfig.class)
-class XxxTest {
+@ContextConfiguration(classes = XxxInfocodeTest.TestConfig.class)
+class XxxInfocodeTest {
+    @Autowired UrlConfig urlConfig;      // Mockito mock，@BeforeEach 里 stub getXxxUrl/getXxxAk
+    @Autowired XxxRemote remote;         // Mockito mock，打桩高德 JSON
+    @Autowired XxxServiceImpl service;   // 构造注入上面两个 mock
+
+    @Test
+    void infocodeIsMappedToErrResponse() {
+        when(remote.xxx(anyString())).thenReturn("{\"status\":\"0\",\"infocode\":\"10004\"}");
+        Response resp = (Response) service.xxx(new XxxReq());
+        assertEquals(Integer.valueOf(1), resp.getStatus());   // 失败外层 status=1
+        BaseResponse base = (BaseResponse) resp.getResult();  // cast 后取 err/msg
+        assertEquals(Integer.valueOf(4701), base.getErr());
+        assertEquals("接口访问量超限", base.getMsg());
+    }
+
     @TestConfiguration
     static class TestConfig {
+        // Aware 回调注入静态容器，RestResult 静态工厂从此可用
         @Bean ApplicationContextProvider applicationContextProvider() { return new ApplicationContextProvider(); }
         @Bean GracefulResponseProperties gracefulResponseProperties() { return new GracefulResponseProperties(); }
         @Bean BaseResponseFactory baseResponseFactory() { return new DefaultBaseRespFactory(); }
         @Bean ResponseFactory responseFactory(BaseResponseFactory b, GracefulResponseProperties p) { return new DefaultRespFactory(b, p); }
-        @Bean UrlConfig urlConfig() { /* mock 配置对象，stub getXxxUrl/getXxxAk */ }
+        @Bean UrlConfig urlConfig() { return mock(UrlConfig.class); }
         @Bean XxxRemote remote() { return mock(XxxRemote.class); }
+        @Bean XxxServiceImpl service(UrlConfig u, XxxRemote r) { return new XxxServiceImpl(u, r); }
     }
 }
 ```
 
 要点：
 - 放 `core/src/test/java/.../service/impl/`（镜像被测类），不是 `web` 切片；`web` 仍只放 `@WebMvcTest`。
-- 服务类经构造注入 mock 的 `UrlConfig` 与 Retrofit Remote，remote 打桩返回 JSON 响应，断言外层 `status` 与 `result.err/msg`。
-- 这类测试的定位是“Tier 1.5”：不连 Nacos/Redis/外部服务，只起最小 Spring 上下文。
+- 断言形态（实测确认）：失败外层 `status=1`、`result` cast `BaseResponse` 后取 `getErr()/getMsg()`；成功外层 `status=0`、`result` 为透传 JSON——成功链路同样可测（remote 打桩 `status=1 + tips/pois 非空`）。
+- 无请求线程时 `DefaultRespFactory.getHttpRequest()` 走容错分支不报错，无需模拟 `RequestContextHolder`。
+- 与 Tier 1 互补而非替代：能抽 static 纯方法的（URL 构建、限流码判断）仍走 Tier 1 秒级纯测；Tier 1.5 只补「组装正确性」（错误码/msg 传参、envelope 形态），避免为个别断言给全部逻辑上上下文。
+- 落地方式：族内各服务按上述模板建 `XxxServiceImplInfocodeTest`（典型覆盖限流 4701、5010、5011、5003 分流与成功链路）；本技能不绑定具体仓库/类名，避免随项目演进失效。
 
 ### 3. core 测试基建
 

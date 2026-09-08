@@ -35,7 +35,13 @@
 ## 构建
 
 - mvn：离线用 `-o`，指定模块用 `-pl <module>`，单模块构建避免全量。
+- mvn：本地仓库路径因机器/配置而异，不要假设默认 `~/.m2` 或写死路径；先探测再使用——看 `python scripts/snapshot_env.py --stdout` 的 `maven.localRepository`，或临时执行 `mvn help:evaluate -Dexpression=settings.localRepository -DforceStdout`；机器级事实记入本机 `env-snapshot.json`/lessons，不写进共享规则。
+- mvn：`-pl <module> -am test -Dtest=Xxx#method` 单方法跑测时，连带模块可能无匹配测试而构建失败，加 `-DfailIfNoTests=false`。
 - pnpm：开发依赖用 `pnpm add -D <pkg>`。
+
+## 编码（控制台）
+
+- 控制台输出编码因机器/终端而异（Windows 常见 GBK 与 UTF-8 混用）：不要用中文关键字 grep 判定构建/提交结果（字节不匹配会误判“无匹配”），改用英文稳定标志（`BUILD`、`Tests run`、`ERROR` + 文件路径行号），或先探测输出编码（如 `[Console]::OutputEncoding`/`chcp`）再决定匹配方式。
 
 ## Node
 

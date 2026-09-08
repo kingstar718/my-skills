@@ -21,6 +21,7 @@
 | `tools.<name>.version` | 版本命令输出首行；失败时记录错误原文（不静默跳过） |
 | `tools.<name>.error` | 探测失败原因（not found / exit code / timeout） |
 | `env` | JAVA_HOME、GOPATH 等关键环境变量（仅记已设置的） |
+| `maven.localRepository` | Maven 本地仓库绝对路径（探测 user/全局 settings.xml 的 `<localRepository>`，缺省回退默认位置；机器级，勿写死进共享规则） |
 | `path` | 完整 PATH 列表（用于判断工具解析顺序） |
 
 ## 使用约定
