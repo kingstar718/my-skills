@@ -9,10 +9,10 @@ description: "按 Spec Coding（规范驱动开发）跟进需求：每个需求
 
 ## 流程
 
-1. 登记：新需求在 `docs/` 建 `xxx需求.md`（单文件模板见 [assets/spec-template.md](assets/spec-template.md)，完整示例见 [assets/spec-example.md](assets/spec-example.md)），同时在 `docs/project.md` 需求登记表加一行，状态 `规划中`。
+1. 登记：新需求在 `docs/` 建 `xxx需求.md`（单文件模板见 [assets/spec-template.md](assets/spec-template.md)，完整示例见 [assets/spec-example.md](assets/spec-example.md)），同时在需求登记表加一行，状态 `规划中`。登记表默认 `docs/project.md`，以仓库 AGENTS.md 指定为准（部分仓库用 `docs/projects-status.md`，沿用既有表头与编号如 R-xx）。
 2. 定稿：spec 中 `待确认项` 全部确认后，状态转 `开发中`，之后才允许动代码。
 3. 测试先行：按 `需求与验收标准` 逐条写单测，现有实现下先跑红，再实现到绿。
-4. 回归：把单测/打包/真实环境结果写进 `回归清单`；真实环境通过后状态转 `已上线`。
+4. 回归：把单测/打包/真实环境结果写进 `回归清单`；真实环境通过后状态转 `已上线`。状态语义补充：测试/SIT 环境通过但未上生产，保持 `待回归` 并注明部署收尾；真实环境不可主动触发（限流码、故障码等）时，回归清单注明“以单测为准，上线后随真实流量观察”。
 5. 收尾：更新文档索引（如 AGENTS.md）；commit message 引用 spec 文件名。
 
 ## 单文件 spec 结构（顺序即阅读顺序）
@@ -29,9 +29,10 @@ description: "按 Spec Coding（规范驱动开发）跟进需求：每个需求
 
 ## 约束
 
-- 小改动（一行需求、缺陷修复）不建独立 spec：直接在 `docs/project.md` 登记表加一行并写清验收与回归结果；涉及接口契约变更才补 spec。
+- 改动面规则：一行式改动、无回归面的缺陷修复可不建独立 spec，直接在登记表加一行并写清验收与回归结果；有回归面（需单测/打包验证）或需跨仓库同步的缺陷修复，按单文件 spec 执行（R-xx）。
 - 验收标准必须可测且编号：`AC-1/AC-2…`，单测用例与验收标准一一对应，宁可少而准。
 - 入参约束要明确：格式、数量上限、长度上限（防穷举/防超长）。
 - 需求变更 = 先改 spec 再改代码，并补回归用例；commit message 引用 spec 文件名。
+- 复制型/多仓库需求：登记表/回归清单记录“镜像仓库与同步状态”，spec 注明先落点仓库与后续铺开范围，避免漏同步。
 - 构建环境、工具链等约定不进 spec，放 AGENTS.md。
 - 文件命名：`docs/xxx需求.md` 或 `xxx接口文档.md`，一个需求一份。

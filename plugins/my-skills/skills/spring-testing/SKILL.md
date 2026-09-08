@@ -18,6 +18,7 @@ description: "Design and implement layered tests for Spring (Boot) projects: pur
 
 规则：
 - 只有需要 Spring 上下文的测试放 `web`；纯逻辑单测放 `core`；`api` 模块不写业务单测（契约测试预留）。
+- lbs-cloud 族例外：生产逻辑依赖上下文静态工厂（graceful-response `RestResult`）且不便抽成静态纯方法时，可在 `core` 用最小 `TestConfiguration` 轻上下文断言 err/msg（模板见 [lbs-cloud-service-test.md](references/lbs-cloud-service-test.md)），不必强行塞到 web 切片。
 - E2E 不参与 Maven `-P test`，CI 单独 stage。
 
 ## 基础设施选择
@@ -41,7 +42,8 @@ description: "Design and implement layered tests for Spring (Boot) projects: pur
 - 含 JUnit5 测试的模块须显式指定 surefire 2.22+（Maven 默认 2.12 不识别 JUnit5，测试会静默不跑）。
 - log4j2 项目里 `spring-boot-starter-test` 需排除 `log4j-to-slf4j` 与 logback（classic/core），否则单测/切片启动报日志冲突。
 - 用例可读性：描述性方法名 + 用例 Javadoc（放在 `@Test` 之前）写明“场景 + 预期结果”，类级 Javadoc 说明覆盖范围；E2E 用 docstring 说明测什么。
-- 依赖 Spring 上下文的响应工厂（如 graceful-response `RestResult`）不能用于纯单测：校验/映射逻辑收敛为返回枚举或纯值的可单测方法，`RestResult` 组装交给切片测试。
+- 依赖 Spring 上下文的响应工厂（如 graceful-response `RestResult`）不能用于纯单测：校验/映射逻辑优先收敛为返回枚举或纯值的静态方法（如 URL 构建）；确需断言 `RestResult` err/msg 时，lbs-cloud 族在 `core` 用最小 `TestConfiguration` 轻上下文（见 [lbs-cloud-service-test.md](references/lbs-cloud-service-test.md)），其他项目仍按分层放切片。
+- lbs-cloud 本地启动与冒烟：用构建产物 `java -jar lib/<app>.jar`（JDK8，可加 `-Dspring.cloud.nacos.discovery.register-enabled=false`），Nacos 可达即可启动并拉配置；外部服务（如高德）调用受 Nacos 下发 httpPool 代理影响，详见 [lbs-cloud-service-test.md](references/lbs-cloud-service-test.md)。
 
 ## 验收标准
 
