@@ -1,6 +1,6 @@
 ---
 name: env-tool-log
-description: "Use when running shell commands, builds, dependency installs, environment configuration, or when a tool/command fails or behaves unexpectedly. Records the machine environment (JDK/Python/Node/npm/Maven versions and paths), logs tool-call failures with root causes to prevent repeating them, and provides tool-invocation rules for writing correct commands. Before executing, check tool rules → failure log → environment snapshot; after a failure, record it immediately. Works as Codex instructions and as Claude Code hooks."
+description: "Use when running shell commands, builds, dependency installs, environment configuration, or when a tool/command fails or behaves unexpectedly. Records the machine environment (JDK/Python/Node/npm/Maven versions and paths), logs tool-call failures with root causes to prevent repeating them, and provides tool-invocation rules for writing correct commands. Before executing, check tool rules → failure log → environment snapshot; after a failure, record it immediately. Works as Codex instructions and as Claude Code and ZCode hooks."
 ---
 
 # Env Tool Log
@@ -22,6 +22,7 @@ description: "Use when running shell commands, builds, dependency installs, envi
 - `scripts/snapshot_env.py`：探测工具版本+路径 → `env-snapshot.json`。
 - `scripts/fail_log.py`：`add` / `query` / `mark-fixed` / `prune` / `lessons`。
 - `scripts/cc_hooks.py` + `scripts/install_cc_hooks.py`：Claude Code 自动捕获与提示（可选）。
+- `scripts/zcode_hooks.py` + `scripts/install_zcode_hooks.py`：ZCode 自动捕获与提示（可选，`PostToolUseFailure` 为官方事件直记失败）。
 
 ## 引用文档（按需读）
 

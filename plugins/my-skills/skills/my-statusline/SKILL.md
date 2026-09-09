@@ -1,13 +1,13 @@
 ---
 name: my-statusline
-description: Use when the user asks to install, apply, or manage the Claude Code status line (statusLine). Installs a status bar showing model, current directory, git branch, and a context-usage progress bar (e.g. ▓░░░░░░░░░ 23k/1m).
+description: Use when the user asks to install, apply, or manage the Claude Code status line (statusLine). Installs a status bar showing model, current directory, git branch, and a context-usage progress bar (e.g. ▓░░░░░░░░░ 23k/1m). Claude Code only — other clients (Codex, ZCode) have no statusLine mechanism; skip this skill there.
 ---
 
 # my-statusline
 
 为 Claude Code 配置底部状态栏(statusLine),显示:
 
-```
+```text
 模型名 | 当前目录 | git 分支 | ▓░░░░░░░░░ 23k/1m | 5h 24% 12:34 | 7d 41% 7/11 10:24
 ```
 

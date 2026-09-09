@@ -1,6 +1,6 @@
 # my-skills
 
-个人 AI 编程 Skill 集合，同时支持 Codex 和 Claude Code。
+个人 AI 编程 Skill 集合，同时支持 Codex、Claude Code 和 ZCode。
 
 ## 包含的 Skill
 
@@ -26,3 +26,18 @@ codex plugin marketplace add kingstar718/my-skills
 ## Claude Code
 
 仓库继续保留 `.claude-plugin/` 清单，并与 Codex 共用 `plugins/my-skills/skills/` 下的 Skill。
+
+## ZCode
+
+技能正文与 ZCode 的 SKILL.md 规范一致，两种安装方式：
+
+**技能直装（本地开发推荐，随仓库工作区即时同步）**：把 `plugins/my-skills/skills/` 下的技能目录链接到 `~/.zcode/skills/`。Windows 用 junction（每个技能一条，撤销用 `rmdir`）：
+
+```powershell
+powershell -NoProfile -Command "New-Item -ItemType Junction -Path \"$HOME\.zcode\skills\env-tool-log\" -Target \"D:\projects\my-skills\plugins\my-skills\skills\env-tool-log\""
+```
+
+**插件方式**：设置 → 插件管理 → 发现 → `+` → 添加 GitHub 仓库 `kingstar718/my-skills`（ZCode 兼容 `.claude-plugin/` 清单），安装 `my-skills` 插件。
+
+- `my-statusline` 为 Claude Code 专用（依赖 statusLine 与订阅用量数据），ZCode 下不安装。
+- `env-tool-log` 自动捕获 hooks（可选）：`python plugins/my-skills/skills/env-tool-log/scripts/install_zcode_hooks.py` 写 `~/.zcode/cli/config.json`（`PostToolUseFailure` 为 ZCode 官方事件直记失败），新建会话生效；`--uninstall` 移除。
