@@ -2,6 +2,8 @@
 
 ## 骨架
 
+包名和文件位置以仓库约定为准；下例仅展示隔离方式。
+
 ```java
 package com.example.app.slice;   // 独立包，避免探测到生产启动类
 
@@ -30,10 +32,10 @@ class XxxControllerTest {
   ```
 - 控制器必须 `@Import` 注册：切片扫描以测试所在包为基准，Controller 不在该包时扫不到会 404。
 
-## 用例注释规范
+## 用例可读性
 
-- 类级 Javadoc：说明测试类覆盖范围（映射/绑定/header/响应结构等）与桩掉的对象；
-- 每个用例在 `@Test` **之前**写一行 Javadoc：场景 + 预期结果（如“GET 缺 q 返回 400，manager 不被调用”）。
+- 使用描述性方法名，并说明覆盖范围和被桩掉的边界；仓库要求 Javadoc/docstring 时沿用既有格式。
+- 失败输出应能直接看出场景和预期，例如“GET 缺 q 返回 400，manager 不被调用”。
 
 ## 响应工厂依赖 Spring 上下文（graceful-response 等）
 

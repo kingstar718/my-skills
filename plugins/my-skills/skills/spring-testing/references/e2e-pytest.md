@@ -2,8 +2,8 @@
 
 ## 位置与形态
 
-- 仓库根 `e2e/`，单文件 `test_*.py`（requests + pytest），不建 conftest；
-- 不参与 Maven 构建；CI 单独 stage 运行 `pytest e2e -v`。
+- 优先沿用仓库已有 E2E 目录、语言和辅助设施；没有约定时可在仓库根使用 `e2e/test_*.py`。
+- 与 Maven 单元/集成测试分开执行，CI 是否作为门禁由流水线明确声明。
 
 ## 用例可读性
 
@@ -14,10 +14,15 @@
 ## 骨架要点
 
 ```python
-HOST = "http://example.internal:1080"   # 固定测试环境地址（或环境变量注入）
+import json
+import os
+
+import pytest
+
+HOST = os.environ["E2E_BASE_URL"]
 
 def _service_up() -> bool: ...                   # 模块级探测一次
-requires_service = pytest.mark.skipif(not SERVICE_UP, reason="环境不可达")
+requires_service = pytest.mark.skipif(not SERVICE_UP, reason="可选环境不可达")
 
 def _body_text(resp) -> str:                      # 断言用
     return json.dumps(resp.json(), ensure_ascii=False)
@@ -25,9 +30,11 @@ def _body_text(resp) -> str:                      # 断言用
 
 ## 规则
 
-- **可达性跳过**：模块级探测，环境不可达时跳过真机用例；CI 要统计 skip 数，避免静默假绿；
+- **可达性策略**：本地可选环境不可达时允许显式跳过；若 CI/SIT/发布 stage 声明目标环境必备，探测失败
+  必须让 stage 失败，不能通过 skip 假绿；
 - **断言**：外层 envelope 字段名可能随框架变化，用 `json.dumps(..., ensure_ascii=False)` 包含中文业务 message 断言最稳；
-- **错误 envelope 先探测再断言**：业务错误码不一定在顶层 `status`。graceful-response 风格为成功 `status=0`（无 msg）、失败 `status=1` 且业务码在 `result.err`；写断言前先 curl 一次确认真实结构，避免把业务码断言错层级；
+- **响应契约先确认再断言**：按接口文档或实际契约断言字段层级，不把某个框架的 envelope 当成通用格式；
 - **数据隔离**：用例用唯一前缀（`__e2e_`）+ 时间戳，`finally` 里 best-effort 清理；
 - **负向用例**：缺失参数、重复删除、未找到等失败路径与正向同等覆盖；
-- 敏感信息（密钥）不要写死进文件，用环境变量/CI secret。
+- **目标与凭据**：地址、密钥和 token 不写死进文件，使用环境变量或 CI secret；日志避免输出敏感头；
+- **证据回填**：若需求有 AC 映射，只记录目标环境、用例和报告链接，不把完整运行日志复制进 spec。

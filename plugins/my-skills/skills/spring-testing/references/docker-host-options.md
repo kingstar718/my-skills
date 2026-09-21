@@ -1,24 +1,22 @@
 # 无 Docker 时的测试基础设施选项
 
-## 优先顺序
+## 选择顺序
 
-1. **Testcontainers**（有 Docker，首选）：真实镜像、方言一致、官方推荐。
-2. **远程 Docker 主机**（本机无 Docker 但有 VM/服务器）：`DOCKER_HOST` 指向远程 daemon。
-3. **嵌入式二进制**（MariaDB4j / embedded-redis）：真实服务器语义、无 Docker，但首次要下载二进制。
-4. **内存库 + mock**（H2 MODE=MySQL / Mockito）：最快但方言/行为有差，只用于纯逻辑层。
+1. 若目标只是业务协作和失败分支，使用 mock，不启动基础设施。
+2. 若目标依赖数据库或中间件真实语义，优先使用本机可用的 Testcontainers/容器运行时。
+3. 本机无容器运行时时，可使用经授权且网络可达的远程容器主机或预置的隔离测试环境。
+4. 嵌入式二进制只在它能忠实表达目标行为时使用；内存数据库不能证明生产数据库方言和锁行为。
 
-## 远程 Docker 主机（VirtualBox 等）要点
+## 远程容器主机要点
 
-- daemon 监听：systemd 服务默认 `-H fd://` 会覆盖 daemon.json 的 `hosts`，需 drop-in 显式指定：
-  ```ini
-  [Service]
-  ExecStart=
-  ExecStart=/usr/sbin/dockerd -H unix:///var/run/docker.sock -H tcp://<host-only-ip>:2375 --containerd=/run/containerd/containerd.sock
-  ```
-  daemon.json 里不要再写 `hosts`（会报"同时指定"错误）。
-- **容器映射端口必须测试机可达**：NAT 只转发 SSH，随机映射端口到不了 → 用 Host-Only/桥接网卡，`DOCKER_HOST=tcp://<host-only-ip>:2375`；
-- `ssh://` 方式：docker-java 默认不支持，需额外加 `docker-java-transport-ssh`，或直接用 tcp；
-- 镜像源被墙：配 `registry-mirrors`（如 `https://docker.1ms.run`），首次拉取镜像。
+- 远程 daemon 等同高权限主机访问，只使用团队批准的认证和网络隔离方案，不在 skill 中建议裸露端口。
+- systemd 服务可能已通过 `-H fd://` 指定监听方式，再在 `daemon.json` 配置 `hosts` 会产生重复配置冲突；
+  调整远程访问前先检查实际 unit/drop-in 和 daemon 配置，确保监听入口只有一个权威来源。
+- 容器映射端口必须从测试机可达；先验证网络和随机端口路由，再排查测试代码。
+- SSH/TCP 等 transport 是否可用取决于 Testcontainers、docker-java 和现有依赖；选择前核对当前版本支持，
+  不假定设置 `DOCKER_HOST` 后所有 transport 都能直接工作。
+- Testcontainers 客户端、传输方式和容器运行时版本要兼容；具体配置遵循项目和平台文档。
+- 镜像应来自团队允许的 registry；离线环境提前准备镜像或缓存，不写死公共镜像代理。
 
 ## 判定表
 
@@ -27,5 +25,5 @@
 | 验证 SQL 方言/索引/锁行为 | Testcontainers 真 MySQL |
 | 验证 Redis/MQ 真实行为 | Testcontainers 容器 |
 | 纯逻辑、无 SQL | Mockito 单测 |
-| 本机无 Docker、有 VM | 远程 tcp daemon |
+| 本机无 Docker、有受控测试主机 | 远程容器或隔离环境 |
 | 完全离线且要真实服务器 | 嵌入式二进制（预置下载缓存） |

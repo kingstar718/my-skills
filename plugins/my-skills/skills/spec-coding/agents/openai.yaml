@@ -1,4 +1,4 @@
 interface:
   display_name: "需求跟进（Spec Coding）"
-  short_description: "单文件 spec：验收标准、设计要点、任务、测试先行与回归"
-  default_prompt: "按 Spec Coding 跟进需求：新建单文件 spec 并登记、定稿、测试先行（红→绿）、实现并回归"
+  short_description: "用核心 spec、可测 AC 与验证证据跟进需求"
+  default_prompt: "使用 $spec-coding 登记并跟进这个需求，按复杂度选择紧凑或目录式 spec。"

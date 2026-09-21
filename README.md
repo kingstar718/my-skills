@@ -10,8 +10,8 @@
 - `my-blog-build`：mars-blog（CF Pages + R2）写作到发布的完整工作流（内容 API 上传、frontmatter 规范、触发重建，写作部分引用 cn-writing）。
 - `my-interview`：交互式面试教练，基于本地 interview-wiki 题库（290+ 算法题解 + 后端八股），练习/模拟面试双模式。
 - `my-statusline`：为 Claude Code 配置底部状态栏(模型 | 目录 | git 分支 | 上下文用量进度条 | 5h/7d 订阅用量)，`/my-statusline` 应用。
-- `spring-testing`：为 Spring (Boot) 项目设计并落地分层测试（单测 / WebMvc 切片 / Testcontainers 集成 / pytest E2E），含无 Docker 时的降级方案。
-- `spec-coding`：Spec Coding（规范驱动开发）需求跟进——单文件 spec（状态/验收标准 EARS/设计要点/任务清单/TDD/回归），测试先行（红→绿）实现。
+- `spring-testing`：按风险为 Spring (Boot) 项目选择并落地单测、切片、真实基础设施集成与黑盒 E2E，明确 mock、Testcontainers 和隔离环境的边界。
+- `spec-coding`：以核心 spec、可测 AC 和验证证据跟进需求；小需求保持单文件，复杂需求按需拆分设计与验证产物。
 
 ## Codex 安装
 

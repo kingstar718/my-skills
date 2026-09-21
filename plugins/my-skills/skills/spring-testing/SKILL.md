@@ -1,51 +1,62 @@
 ---
 name: spring-testing
-description: "Design and implement layered tests for Spring (Boot) projects: pure unit tests in core modules, WebMvc slice tests, SpringBootTest integration tests with Testcontainers for real MySQL/Redis, and black-box HTTP E2E with pytest. Use when asked to write, organize, migrate, or review tests for a Spring project; choose between H2/Testcontainers/mocks; run Spring integration tests without local Docker; set up Testcontainers, slice-test isolation, or pytest E2E test suites."
+description: "Design, implement, organize, or review layered tests for Spring (Boot) projects. Select the lowest-cost layer that proves the behavior; decide when mocks, slices, real infrastructure, Testcontainers, isolated clusters, or black-box E2E are appropriate. Do not use for generic requirement tracking or non-Spring test suites."
 ---
 
 # Spring 项目测试
 
-为 Spring（Boot）项目设计并落地分层测试。按"必须真 vs 可以桩"决策外部依赖，按模块放测试，避免内存库方言陷阱。
+为 Spring（Boot）项目设计并落地分层测试。先识别要证明的行为和风险，再选择足够真实且成本最低的
+测试层级。测试位置遵循仓库结构，不用模块名代替测试语义。
 
 ## 测试分层与落点
 
-| 层 | 位置 | 覆盖 | 外部依赖 |
-|----|------|------|----------|
-| Tier 1 纯单测 | `core/src/test/java/...`（按被测包镜像） | service/manager/config/工具逻辑 | 无，秒级 |
-| Tier 2 切片 | `web/src/test/java/.../slice/` | `@WebMvcTest` Controller 层（映射/绑定/header/序列化） | 无 |
-| Tier 3 集成 | `web/src/test/java/.../` | `@SpringBootTest` + Testcontainers（真实 DB/Redis + 配置源） | Docker + 可达配置中心 |
-| E2E | 仓库根 `e2e/`（pytest，独立于 Maven） | 黑盒打真实网关（部署后行为） | 可达测试环境 |
+| 层 | 证明什么 | Spring/外部依赖 |
+|----|----------|-----------------|
+| Tier 1 纯单测 | 纯计算、领域规则、协作与失败分支 | 不启动 Spring；依赖用 stub/mock |
+| Tier 2 切片 | MVC 映射、参数绑定、序列化、局部组件装配 | 只启动目标切片；其余依赖桩掉 |
+| Tier 3 集成 | Bean 装配、事务、SQL/Redis/MQ/驱动或协议语义 | 最小必要上下文 + 隔离的真实基础设施 |
+| E2E | 已部署系统的跨进程 HTTP 契约与关键用户路径 | 黑盒访问明确的测试目标 |
 
 规则：
-- 只有需要 Spring 上下文的测试放 `web`；纯逻辑单测放 `core`；`api` 模块不写业务单测（契约测试预留）。
-- lbs-cloud 族例外：生产逻辑依赖上下文静态工厂（graceful-response `RestResult`）且不便抽成静态纯方法时，可在 `core` 用最小 `TestConfiguration` 轻上下文断言 err/msg（模板见 [lbs-cloud-service-test.md](references/lbs-cloud-service-test.md)），不必强行塞到 web 切片。
-- E2E 不参与 Maven `-P test`，CI 单独 stage。
+- 优先沿用仓库已有模块、命名、测试插件和 CI 分层；只有缺少约定时才提出新结构。
+- 测试层级由启动范围和依赖真实性定义，不由 `core`、`web`、`api` 等目录名定义。
+- 先选能证明风险的最低层级；不要用 E2E 覆盖所有分支，也不要用 mock 声称证明了中间件行为。
+- 若已有需求 spec，将测试层级、用例位置和外部依赖回填到 AC 验证映射；本 skill 不管理需求状态。
 
 ## 基础设施选择
 
-- **数据库**：Testcontainers 真实 MySQL，不用 H2/HSQLDB（方言差异会制造假阳性）。
-- **Redis/MQ**：Testcontainers 容器（真实行为），不 mock。
-- **配置中心（Nacos 等）**：是来源不是行为——可达就真实连，否则 `@MockBean`/本地配置桩掉。
-- **无 Docker**：按顺序降级——远程 Docker 主机（VirtualBox VM）→ 嵌入式二进制（MariaDB4j/embedded-redis）→ 纯 mock。详见 [docker-host-options.md](references/docker-host-options.md)。
+- **业务协作**：验证调用条件、参数、返回值和异常分支时，mock 数据库、Redis、MQ 或远程服务。
+- **基础设施语义**：验证 SQL 方言/事务/锁、Redis Lua/TTL、消息序列化或客户端行为时，使用与生产语义
+  相符的隔离实例；Testcontainers 是常见选择，不是唯一选择。
+- **拓扑行为**：Cluster、双 cell、网络或厂商中间件无法由单容器表达时，使用显式指定的隔离环境；
+  测试必须使用唯一前缀并清理数据，禁止自动写入生产或共享业务数据。
+- **配置中心**：默认用测试属性或配置桩。只有配置加载、group/namespace 隔离或热更新本身是目标时，
+  才连接真实配置中心。
+- **无 Docker**：根据目标在远程容器、嵌入式服务、隔离环境和纯 mock 之间选择，记录没有覆盖的风险。
+  详见 [docker-host-options.md](references/docker-host-options.md)。
 
 ## 落地流程（按需读引用）
 
-1. 盘点外部依赖，按上表分类，确定分层。
-2. 写 Tier 1 单测：纯 JUnit5 + Mockito，不启动 Spring。
-3. 写 Tier 2 切片：`@WebMvcTest` + 独立启动类。见 [slice-tests.md](references/slice-tests.md)。
-4. 写 Tier 3 集成：Testcontainers 容器 + 动态属性注入 + bean 覆盖。见 [testcontainers-integration.md](references/testcontainers-integration.md)。
-5. 写 E2E：单文件 pytest 黑盒。见 [e2e-pytest.md](references/e2e-pytest.md)。
+1. 盘点要证明的行为、失败模式和现有测试结构。
+2. 从 Tier 1 开始，只有当前层无法证明风险时才上移。
+3. MVC 切片的隔离与上下文陷阱见 [slice-tests.md](references/slice-tests.md)。
+4. 真实数据库/Redis 等集成方式见 [testcontainers-integration.md](references/testcontainers-integration.md)。
+5. 黑盒 HTTP 测试和环境门禁见 [e2e-pytest.md](references/e2e-pytest.md)。
+6. 仅当项目依赖 `com.sf.lbs.cloud.*` 且命中对应问题时，读取
+   [lbs-cloud-service-test.md](references/lbs-cloud-service-test.md)。
 
 ## 工程约定
 
-- 测试默认执行：不要硬编码 surefire `skipTests`；`mvn test` 直接跑测试，打包/CI 用 `-Dmaven.test.skip=true` 跳过。
-- 含 JUnit5 测试的模块须显式指定 surefire 2.22+（Maven 默认 2.12 不识别 JUnit5，测试会静默不跑）。
-- log4j2 项目里 `spring-boot-starter-test` 需排除 `log4j-to-slf4j` 与 logback（classic/core），否则单测/切片启动报日志冲突。
-- 用例可读性：描述性方法名 + 用例 Javadoc（放在 `@Test` 之前）写明“场景 + 预期结果”，类级 Javadoc 说明覆盖范围；E2E 用 docstring 说明测什么。
-- 依赖 Spring 上下文的响应工厂（如 graceful-response `RestResult`）不能用于纯单测：校验/映射逻辑优先收敛为返回枚举或纯值的静态方法（如 URL 构建）；确需断言 `RestResult` err/msg 时，lbs-cloud 族在 `core` 用最小 `TestConfiguration` 轻上下文（见 [lbs-cloud-service-test.md](references/lbs-cloud-service-test.md)），其他项目仍按分层放切片。
-- lbs-cloud 本地启动与冒烟：用构建产物 `java -jar lib/<app>.jar`（JDK8，可加 `-Dspring.cloud.nacos.discovery.register-enabled=false`），Nacos 可达即可启动并拉配置；外部服务（如高德）调用受 Nacos 下发 httpPool 代理影响，详见 [lbs-cloud-service-test.md](references/lbs-cloud-service-test.md)。
+- 测试应默认可由标准测试命令执行；不要在模块配置里永久跳过测试。若流水线已经在前置阶段完成验证，
+  后续纯打包阶段可按仓库约定跳过重复执行，并明确该依赖关系。
+- Maven 使用 JUnit 5 时，Surefire 至少为 2.22；具体版本优先跟随项目 BOM，并确认测试实际运行且数量
+  不为 0，不能只看构建成功。Gradle 同样要确认测试引擎实际识别用例。
+- Testcontainers、数据库和中间件版本优先跟随项目 BOM 与生产兼容范围，不在通用 skill 固定最新版本。
+- 用例命名和注释遵循仓库风格；描述应能从失败输出看出场景与预期，不强制所有项目使用同一种注释格式。
+- 不修改生产可见性或引入无业务价值的包装只为方便测试；可以通过合理职责拆分提升可测试性。
 
 ## 验收标准
 
-- 单测/切片秒级、零外部依赖；集成测试 schema 与生产 DDL 对齐；E2E 环境不可达时可见跳过（不静默假绿）。
-- 新增测试遵守既有分层；不改动生产代码逻辑只为测试服务。
+- 单测/切片应快速、确定且不依赖共享环境；集成测试保留被验证的生产约束并隔离数据。
+- 本地可选 E2E 在环境不可达时可以显式跳过；CI/SIT/发布门禁声明目标环境必备时必须失败。
+- 最终报告说明每个风险由哪一层证明、哪些外部行为仍未覆盖，避免“BUILD SUCCESS 但没有测试运行”。

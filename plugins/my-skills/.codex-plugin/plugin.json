@@ -1,7 +1,7 @@
 {
   "name": "my-skills",
-  "version": "1.9.5",
-  "description": "个人 Git 工作流与测试 Skill 集合",
+  "version": "1.10.0",
+  "description": "个人研发工作流、写作、测试与环境工具 Skill 集合",
   "author": {
     "name": "kingstar718",
     "email": "kingstar718@foxmail.com",
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "My Skills",
-    "shortDescription": "规范 Git 提交与日常开发工作流。",
-    "longDescription": "提供跨 Codex 与 Claude Code 使用的个人开发 Skill，包含 Git 提交规范与环境工具失败日志技能。",
+    "shortDescription": "规范需求、测试、Git 与日常开发工作流。",
+    "longDescription": "提供跨 Codex、Claude Code 与 ZCode 使用的个人 Skill，覆盖需求跟进、Spring 测试、Git、写作及环境工具。",
     "developerName": "kingstar718",
     "category": "Developer Tools",
     "capabilities": [
