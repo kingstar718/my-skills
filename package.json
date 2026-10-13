@@ -1,0 +1,23 @@
+{
+  "name": "my-skills",
+  "version": "1.12.0",
+  "description": "个人研发工作流、写作、测试与环境工具 Skill 集合，供 Pi、Codex、Claude Code 和 ZCode 使用",
+  "keywords": [
+    "pi-package",
+    "skills",
+    "claude-code",
+    "codex"
+  ],
+  "homepage": "https://github.com/kingstar718/my-skills",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kingstar718/my-skills.git"
+  },
+  "author": "kingstar718",
+  "pi": {
+    "skills": [
+      "./plugins/my-skills/skills",
+      "-./plugins/my-skills/skills/my-statusline"
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # my-skills
 
-个人 AI 编程 Skill 集合，同时支持 Codex、Claude Code 和 ZCode。
+个人 AI 编程 Skill 集合，同时支持 Pi、Codex、Claude Code 和 ZCode。
 
 ## 包含的 Skill
 
@@ -27,6 +27,23 @@ codex plugin marketplace add kingstar718/my-skills
 ## Claude Code
 
 仓库继续保留 `.claude-plugin/` 清单，并与 Codex 共用 `plugins/my-skills/skills/` 下的 Skill。
+
+## Pi
+
+仓库根 `package.json` 提供 Pi 包清单，`pi.skills` 指向 `plugins/my-skills/skills`：
+
+```bash
+# 其他机器：从 GitHub 安装
+pi install git:github.com/kingstar718/my-skills
+
+# 本仓库开发：按路径就地加载，随工作区改动即时同步
+pi install D:\projects\my-skills
+
+# 只试用一次，不写入配置
+pi -e D:\projects\my-skills
+```
+
+安装或更新后 `/reload` 或新建会话生效。清单里 `my-statusline` 以排除项（`-` 前缀）去掉，Pi 下加载 8 个 Skill。
 
 ## ZCode
 

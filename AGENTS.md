@@ -2,7 +2,7 @@
 
 ## 仓库定位
 
-本仓库维护可同时供 Codex、Claude Code 和 ZCode 使用的个人技能。插件源码位于
+本仓库维护可同时供 Pi、Codex、Claude Code 和 ZCode 使用的个人技能。插件源码位于
 `plugins/my-skills/`；安装目录和 `~/.codex/plugins/cache/` 仅是生成或缓存结果，不是修改入口。
 
 ## 修改入口
@@ -10,12 +10,13 @@
 - Skill 源码：`plugins/my-skills/skills/<skill-name>/`
 - Codex manifest：`plugins/my-skills/.codex-plugin/plugin.json`
 - Claude Code manifest：`.claude-plugin/plugin.json`
+- Pi manifest：`package.json`（`pi.skills`）
 - Marketplace：`.agents/plugins/marketplace.json`
 - 需求登记：`docs/project.md`
 - 中大型需求：`docs/specs/<R-xx-name>/`
 
-不要直接修改 Codex 插件缓存。发布时保持 Codex 与 Claude Code manifest 的基础版本一致；Codex
-本地迭代所需的 cachebuster 通过插件更新脚本生成，不手改 marketplace。
+不要直接修改 Codex 插件缓存。发布时保持 Codex manifest、Claude Code manifest、Pi manifest 与 Claude
+marketplace 的基础版本一致；Codex 本地迭代所需的 cachebuster 通过插件更新脚本生成，不手改 marketplace。
 
 ## 文档工作流
 
@@ -38,5 +39,7 @@
 同时运行 `plugin-creator` 自带的 `validate_plugin.py`。Windows 读取中文 UTF-8 文件若受默认 GBK 编码影响，
 先设置 `PYTHONUTF8=1`。
 
-同时检查 JSON/YAML 可解析、相对链接存在，以及两个 manifest 的基础版本一致。需要让 Codex
+同时检查 JSON/YAML 可解析、相对链接存在，以及各客户端 manifest 与 marketplace 的基础版本一致。
+Pi 清单改动还需确认解析出的技能集合符合预期（Pi 包清单与设置项都用 `!`/`+`/`-` 前缀做筛选，
+其中 `!` 模式的匹配不做 `./` 归一化，路径需写成 `-./path` 或 `!path`）。需要让 Codex
 加载本地改动时，按 plugin-creator 的 cachebuster + reinstall 流程操作，并在新会话验证。
