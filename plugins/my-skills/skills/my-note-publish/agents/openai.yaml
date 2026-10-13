@@ -1,0 +1,4 @@
+interface:
+  display_name: "my-note-publish"
+  short_description: "通过博客内容 API 发布随记或存草稿，复用发布 ID 并读回验证"
+  default_prompt: "使用 $my-note-publish 把这段正文发布为随记，并报告保存与重建结果。"

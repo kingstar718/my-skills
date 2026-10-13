@@ -8,6 +8,7 @@
 - `git-commit-convention`：提交前检查目标文件，生成中文 Conventional Commits message，并仅在 AI 身份明确时添加联署。
 - `cn-writing`：中文技术写作通用规范（标题、行文硬约束、禁用表达清单、结构、数字术语、代码示例、复验），my-blog-build 等写作类 skill 共用。
 - `my-blog-build`：mars-blog（CF Pages + R2）写作到发布的完整工作流（内容 API 上传、frontmatter 规范、触发重建，写作部分引用 cn-writing）。
+- `my-note-publish`：从本地正文文件发布无标题随记或存草稿，生成可复用发布记录、检查同名冲突并读回验证；使用博客内容 API，无需 Memos 或 R2 凭据。
 - `my-interview`：交互式面试教练，基于本地 interview-wiki 题库（290+ 算法题解 + 后端八股），练习/模拟面试双模式。
 - `my-statusline`：为 Claude Code 配置底部状态栏(模型 | 目录 | git 分支 | 上下文用量进度条 | 5h/7d 订阅用量)，`/my-statusline` 应用。
 - `spring-testing`：按风险为 Spring (Boot) 项目选择并落地单测、切片、真实基础设施集成与黑盒 E2E，明确 mock、Testcontainers 和隔离环境的边界。

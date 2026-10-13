@@ -5,6 +5,10 @@ description: 为 mars-blog（Cloudflare Pages + R2 静态站）生成/修改文�
 
 # my-blog-build
 
+从本地正文文件发布新随记或存随记草稿时，优先使用同插件的
+[my-note-publish](../my-note-publish/SKILL.md)，复用其发布脚本和重试记录；
+本 skill 继续负责长文、已有内容修改、图片上传及站点构建。
+
 面向 mars-blog（v3，Cloudflare Pages 静态化）的端到端写作与发布方案。覆盖内容规范、内容 API 上传、重建等待与校验全流程。
 
 ## 项目与内容真相源
@@ -60,7 +64,7 @@ draft: false
 
 ### 写作规范
 
-**正文写作一律遵守通用写作 skill [`cn-writing`](../../cn-writing/SKILL.md)——动笔前先读取该文件，再开始写作。** 其中「标题、行文硬约束、禁用表达清单、结构约束、数字与术语、代码与示例、复验清单」全部适用。
+**正文写作一律遵守通用写作 skill [`cn-writing`](../cn-writing/SKILL.md)——动笔前先读取该文件，再开始写作。** 其中「标题、行文硬约束、禁用表达清单、结构约束、数字与术语、代码与示例、复验清单」全部适用。
 
 下文只列站点特有的内容约定；frontmatter 见上方「Frontmatter Schema」。
 
