@@ -1,6 +1,6 @@
 # R-03 Pi 包清单
 
-状态：已上线。清单解析、技能集合与资源加载已在本机验证；Git 源安装待其他机器复验。
+状态：已上线。清单解析、技能集合、资源加载与 Git 源端到端安装均已验证。
 
 ## 范围
 
@@ -14,7 +14,7 @@ Codex manifest、Claude Code manifest、Claude marketplace 与 Pi 清单的基�
 
 | AC | 行为 | 当前验证结果 |
 | --- | --- | --- |
-| AC-1 | Pi 按清单解析出 8 个技能，且不含 `my-statusline` | 用 Pi 1.2.0 包管理器解析本地源，得到 8 个技能，`my-statusline` 未加载 |
+| AC-1 | Pi 按清单解析出 8 个技能，且不含 `my-statusline` | 本地源与 Git 源均解析出 8 个技能，`my-statusline` 未加载 |
 | AC-2 | 按包加载时技能元数据有效、无诊断 | 用 Pi 资源加载器加载该包，8 个技能全部有效，diagnostics 为 0 |
 | AC-3 | 既有客户端的发现结果不变 | 两个既有 manifest 与 Claude marketplace 仅版本号变化，路径与技能列表未变 |
 | AC-4 | 文档覆盖安装方式与排除说明，各清单版本一致 | README 已加 Pi 章节；四处版本统一为 1.12.0，JSON 均可解析 |
@@ -33,7 +33,7 @@ Pi 1.2.0：`DefaultPackageManager.resolveExtensionSources(["D:/projects/my-skill
 解析出 8 个 `SKILL.md` 且全部 enabled，`my-statusline` 不在结果中；extensions、prompts、themes 均为 0。
 Pi 1.2.0：隔离 agent 目录后以 `packages: ["D:/projects/my-skills"]` 调用 `DefaultResourceLoader.reload()`，
 得到 8 个技能、diagnostics 为 0（同一次运行另有 `~/.agents/skills` 的 2 个技能，与本次改动无关）。
+Pi 1.2.0：`pi install git:github.com/kingstar718/my-skills` 克隆提交 `752c9bc` 到 agent 目录后，
+按全局 `packages` 加载得到同一组 8 个技能、diagnostics 为 0，`my-statusline` 未加载。
 9 个技能均通过 `skill-creator/scripts/quick_validate.py`；四处清单 JSON 解析通过且版本号一致。
-本机未执行 `pi install git:...` 的端到端安装（需先推送本提交）；npm、git 与本地源共用
-`collectPackageResources` 的同一份清单解析路径，行为一致。
-待确认项：Git 源安装在其他机器复验。
+待确认项：无阻塞项。
