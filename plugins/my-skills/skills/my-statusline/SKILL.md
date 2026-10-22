@@ -1,6 +1,6 @@
 ---
 name: my-statusline
-description: Use when the user asks to install, apply, or manage the Claude Code status line (statusLine). Installs a status bar showing model, current directory, git branch, and a context-usage progress bar (e.g. ▓░░░░░░░░░ 23k/1m). Claude Code only — other clients (Codex, ZCode) have no statusLine mechanism; skip this skill there.
+description: Use when the user asks to install, apply, or manage the Claude Code status line (statusLine). Installs a status bar showing model, current directory, git branch, and a context-usage progress bar (e.g. ▓░░░░░░░░░ 23k/1m). Claude Code only — skip this skill in Codex and Pi.
 ---
 
 # my-statusline

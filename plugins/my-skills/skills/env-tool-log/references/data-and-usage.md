@@ -82,7 +82,7 @@
 | fix | 当前修复方法或候选方案 |
 | verified_fix | 上次经 mark-fixed 确认的方法，复发仍保留 |
 | status | OPEN / FIXED |
-| from | 记录来源，如 codex / cc / zcode / pi；手工调用应显式传入，旧默认 codex 保留兼容 |
+| from | 记录来源，如 codex / cc / pi；手工调用应显式传入，旧默认 codex 保留兼容 |
 | ts_fixed | 最近一次验证修复的时间，复发后可保留 |
 
 ## 日志命令
@@ -118,15 +118,6 @@ python scripts/fail_log.py lessons [--apply]
 - `UserPromptSubmit`：提示词命中工具名时注入对应规则。
 - 安装：`python scripts/install_cc_hooks.py`（写 `~/.claude/settings.json`，使用绝对路径，不依赖 CLAUDE_PLUGIN_ROOT）；`--print` 预览；`--uninstall` 移除；`--scope project` 写项目级 `.claude/settings.local.json`。
 - `PostToolUseFailure` 并非官方事件（官方列表无此项），注册仅为兼容可能支持它的版本；与 `PostToolUse` 双触发时同 sig 更新同一记录；count 表示登记次数，不保证等于实际命令次数。
-
-## ZCode hooks
-
-- 配置位置：`~/.zcode/cli/config.json` → `hooks.events`（结构 `{ enabled, events: { <Event>: [{ matcher?, hooks }] } }`），配置文件 hooks 默认禁用，安装脚本会写 `hooks.enabled: true`。
-- `PostToolUseFailure`（全部工具）：ZCode 官方事件，仅失败时触发，直接记录（`from=zcode`），无需像 Claude 那样读 transcript 判定。
-- `PreToolUse`（matcher `Bash`，大小写敏感正则）：命中 `[BLOCK]` 规则时退出码 2 deny，原因写 stderr；不走 JSON 输出，规避严格 schema 校验。
-- `SessionStart` / `UserPromptSubmit`：注入内容同 Claude 版；输出用 Claude 兼容 envelope（`hookSpecificOutput.additionalContext`），若客户端日志报 schema 校验失败需按实际支持的键调整。
-- hook 用 `type: "process"`（参数向量不经 shell），Windows 下避免 shell 转义问题。
-- 安装：`python scripts/install_zcode_hooks.py`（写 `~/.zcode/cli/config.json`，绝对路径）；`--print` 预览；`--uninstall` 移除；`--scope workspace` 写项目级 `.zcode/config.json`。新建会话后生效。
 
 ## 隐私
 

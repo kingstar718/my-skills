@@ -46,7 +46,7 @@ shell 与内置工具都适用；会话首次使用时查看相关经验，之�
 
 默认数据目录为 `~/.my-skills/env-tool-log/`，由同一用户下的各 harness 共用，
 显式配置的 `ENV_TOOL_LOG_DIR` 优先。客户端记录来源由 `from` 字段区分；
-手工调用 `add` 时按当前客户端传入 `--from codex/cc/zcode/pi`，不把默认来源当作自动识别。
+手工调用 `add` 时按当前客户端传入 `--from codex/cc/pi`，不把默认来源当作自动识别。
 
 检测到旧版 `.codex` 数据时，仅向 stderr 提示旧目录与当前目录，不自动搬移、合并或读取。
 迁移前可通过环境变量明确沿用旧目录；确认迁移后，所有 harness 应统一使用新目录。
@@ -59,7 +59,7 @@ shell 与内置工具都适用；会话首次使用时查看相关经验，之�
   参数、分类与客户端 hooks 见[数据与使用](references/data-and-usage.md#记录与闭环)。
 - **环境快照**：`scripts/snapshot_env.py` 按需探测工具路径和版本；
   刷新时机与字段见[环境快照](references/data-and-usage.md#环境快照)。
-- **客户端 hooks**：Claude Code 与 ZCode 安装脚本按需使用，不自动安装或修改客户端配置。
+- **客户端 hooks**：Claude Code 安装脚本按需使用，不自动安装或修改客户端配置。
   自动捕获的记录仍需核对是否为预期失败，并在实际修复后闭环。
 
 ## 跨 harness 接入

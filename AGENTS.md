@@ -2,7 +2,7 @@
 
 ## 仓库定位
 
-本仓库维护可同时供 Pi、Codex、Claude Code 和 ZCode 使用的个人技能。插件源码位于
+本仓库维护可同时供 Pi、Codex 和 Claude Code 使用的个人技能。插件源码位于
 `plugins/my-skills/`；安装目录和 `~/.codex/plugins/cache/` 仅是生成或缓存结果，不是修改入口。
 
 ## 修改入口
@@ -13,16 +13,17 @@
 - Pi manifest：`package.json`（`pi.skills`）
 - Marketplace：`.agents/plugins/marketplace.json`
 - 需求登记：`docs/project.md`
-- 中大型需求：`docs/specs/<R-xx-name>/`
+- 需求正文：默认使用单份 `docs/R-xx-name.md`，已有入口以 `docs/project.md` 为准。
 
 不要直接修改 Codex 插件缓存。发布时保持 Codex manifest、Claude Code manifest、Pi manifest 与 Claude
 marketplace 的基础版本一致；Codex 本地迭代所需的 cachebuster 通过插件更新脚本生成，不手改 marketplace。
 
 ## 文档工作流
 
-- 小改动可在一份核心 spec 中完成；跨 skill、包含独立设计或多阶段验证的需求使用目录式 spec。
+- 默认在单份需求 Markdown 中维护规则、设计要点和验证结果。
+- 用户明确要求或部分内容确需独立维护时才拆分；不以篇幅、复杂度或对话轮次决定。
 - 核心 spec 只维护状态、范围、验收标准、关键决策和验证映射，是需求契约的唯一真相源。
-- 详细设计写 `design.md`，执行证据写 `verification.md`；不在多个文件复制相同正文。
+- 已有独立设计或验证文档时，用链接引用，不在多个文件复制相同正文。
 - `AGENTS.md` 只放长期有效的仓库约束和入口；Git 历史承担修订历史。
 
 ## Skill 约定

@@ -10,7 +10,6 @@ from unittest.mock import patch
 import fail_log
 import snapshot_env
 import cc_hooks
-import zcode_hooks
 
 
 class FailureLogTest(unittest.TestCase):
@@ -61,7 +60,7 @@ class FailureLogTest(unittest.TestCase):
         self.assertFalse((target / "failures.jsonl").exists())
 
     def test_snapshot_and_hooks_share_directory_resolver(self):
-        for client in [snapshot_env, cc_hooks, zcode_hooks]:
+        for client in [snapshot_env, cc_hooks]:
             self.assertIs(client.fail_log, fail_log)
             self.assertEqual(client.fail_log.data_dir(), self.temp.name)
 

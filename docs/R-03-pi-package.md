@@ -8,7 +8,7 @@
 并用 `-` 排除项去掉 Claude Code 专用的 `my-statusline`。
 README 增加 Pi 安装章节，AGENTS.md 登记 Pi manifest 入口与校验要求。
 本需求上线时，Codex manifest、Claude Code manifest、Claude marketplace 与 Pi 清单的基础版本统一为1.12.0。
-不修改任何 skill 正文，不改动 Codex、Claude Code、ZCode 的既有安装方式，不新增运行时依赖。
+不修改任何 skill 正文，不改动 Codex、Claude Code 的既有安装方式，不新增运行时依赖。
 
 关联需求：
 
