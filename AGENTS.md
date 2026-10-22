@@ -29,7 +29,8 @@ marketplace 的基础版本一致；Codex 本地迭代所需的 cachebuster 通�
 ## Skill 约定
 
 代码工作流入口为 `code-spec`、`code-test`、`code-review`，按需求、验证与审阅场景分别使用。
-`cn-writing` 与 `my-interview` 保留独立入口；已改名的旧技能不再作为兼容副本分发。
+`cn-writing`、`my-interview` 与 `my-learn` 保留独立入口；已改名的旧技能不再作为兼容副本分发。
+`my-learn` 负责通用学习和交互课程，`my-interview` 保留题库与面试训练；学习数据不随技能分发。
 
 - `SKILL.md` 保留触发条件、核心决策和资源路由；条件性细节放 `references/`。
 - `assets/` 是生成产物使用的模板，不作为默认加载的完整说明书。

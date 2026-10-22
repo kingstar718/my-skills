@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>任务为什么会积压 · My Learn 示例</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #21342e; background: #f5f5ef; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 800px; margin: auto; padding: 32px 20px 64px; }
+    h1 { font-size: clamp(1.65rem, 5vw, 2.35rem); line-height: 1.25; }
+    h2 { font-size: 1.2rem; margin-top: 0; }
+    p, li { line-height: 1.8; }
+    header > p, .muted { color: #52635b; }
+    section { padding: 24px; margin-top: 20px; border: 1px solid #d9e0d7; border-radius: 16px; background: #fff; }
+    label { display: block; margin: 12px 0 8px; font-weight: 600; }
+    input[type=range] { width: 100%; accent-color: #20624e; }
+    input[type=text], textarea { width: 100%; font: inherit; padding: 12px; border: 1px solid #8c9e94; border-radius: 8px; }
+    textarea { min-height: 110px; resize: vertical; }
+    button, .button { font: inherit; padding: 10px 16px; border: 1px solid #20624e; border-radius: 8px; background: #20624e; color: #fff; cursor: pointer; }
+    button.secondary { background: #fff; color: #20624e; }
+    button:disabled { opacity: .55; cursor: default; }
+    :focus-visible { outline: 3px solid #ba780a; outline-offset: 3px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .parameters { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .queue { display: flex; align-content: start; flex-wrap: wrap; gap: 6px; min-height: 78px; padding: 16px; border-radius: 10px; background: #edf4ee; }
+    .task { width: 20px; height: 20px; background: #287057; border-radius: 4px; animation: enter .25s ease-out; }
+    output { font-weight: 600; }
+    details { margin-top: 12px; }
+    summary { cursor: pointer; padding: 6px 0; }
+    .feedback { min-height: 1.8em; margin-bottom: 0; }
+    a { color: #175e49; }
+    @keyframes enter { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .task { animation: none; } }
+    @media (max-width: 540px) { section { padding: 18px; } .parameters { grid-template-columns: 1fr; gap: 0; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p>MY LEARN · 可改编的课程示例</p>
+    <h1>任务为什么会积压</h1>
+    <p>目标：预测队列变化，并说明到达量与处理量怎样影响积压。先预测，再单步实验，最后用自己的话解释。</p>
+  </header>
+  <section aria-labelledby="model-title">
+    <h2 id="model-title">先明确模型</h2>
+    <p>每轮先加入任务，再处理最多指定数量的任务。剩余任务进入下一轮；任务不可为负，队列没有容量上限。</p>
+    <p><strong>本轮剩余 = max(0，上轮剩余 + 到达量 − 处理量)</strong></p>
+    <p>这里把每个任务的耗时简化为相同。真实线程池还有并发、耗时波动和满载策略，这个实验不能用于估算真实吞吐量。</p>
+    <p class="muted">知识联系：到达量与处理量是供需关系；队列承接差额。加入容量限制后，还需要选择拒绝、丢弃或让上游等待等策略。</p>
+    <p class="muted">拓展阅读：<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html">Java 线程池的队列与拒绝策略</a>。下面的规则是明确给定的教学模型。</p>
+  </section>
+  <section aria-labelledby="experiment-title">
+    <h2 id="experiment-title">调整参数，先预测第一轮</h2>
+    <div class="parameters">
+      <div><label for="arrivals">每轮到达量：<output id="arrivals-value">5</output></label><input id="arrivals" type="range" min="0" max="10" value="5"></div>
+      <div><label for="service">每轮处理量：<output id="service-value">2</output></label><input id="service" type="range" min="0" max="10" value="2"></div>
+    </div>
+    <form id="prediction-form">
+      <label for="prediction">从空队列开始，第一轮结束后剩余几个任务？</label>
+      <input id="prediction" type="text" inputmode="numeric" autocomplete="off" aria-describedby="prediction-help" required>
+      <p id="prediction-help" class="muted">输入非负整数。修改参数会重置实验；此前作答和已见提示会保留。</p>
+      <details id="prediction-hint"><summary>查看提示</summary><p>先把到达的任务加入空队列，再减去能处理的数量；处理量大于已有任务时，剩余仍为0。</p></details>
+      <div class="actions"><button type="submit">提交预测</button><button id="show-solution" class="secondary" type="button">直接看解法</button></div>
+      <p id="prediction-feedback" class="feedback" role="status" aria-live="polite"></p>
+    </form>
+    <div class="actions"><button id="step" type="button">推进一轮</button><button id="reset" class="secondary" type="button">重置实验</button></div>
+    <p id="experiment-status" role="status" aria-live="polite"></p>
+    <div id="queue" class="queue" aria-hidden="true"></div>
+    <p class="muted">最多绘制24个方块，剩余任务数以上方文字为准。单步操作不会自动提交答案。</p>
+  </section>
+  <section aria-labelledby="reflection-title">
+    <h2 id="reflection-title">连接到新的场景</h2>
+    <p>如果到达量长期大于处理量，队列会怎样变化？如果队列只能放10个任务，你会怎样限制上游，或处理放不下的任务？说明理由。</p>
+    <form id="reflection-form">
+      <label for="reflection">用自己的话解释</label>
+      <textarea id="reflection" required></textarea>
+      <div class="actions"><button type="submit">记录回答</button></div>
+      <p id="reflection-feedback" class="feedback" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+  <section aria-labelledby="export-title">
+    <h2 id="export-title">把表现带回学习会话</h2>
+    <p id="attempt-count" aria-live="polite">已记录0次作答。</p>
+    <button id="export" type="button" disabled>导出作答 JSON</button>
+    <p class="muted">本页不连接 AI，也不上传数据。关闭前请导出，并把文件路径交给 Agent；它会结合提示使用和回答安排下一课。开放题等待 Agent 评阅，本地答对不等于已掌握。</p>
+    <p id="export-feedback" class="feedback" role="status" aria-live="polite"></p>
+  </section>
+</main>
+<script>
+'use strict';
+const element = id => document.getElementById(id);
+const makeId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const lesson = { schemaVersion: 1, topicId: 'task-queue', lessonId: 'queue-balance-01', lessonRevision: '1' };
+const sessionId = makeId();
+const attempts = [];
+const exposure = { hintUsed: false, solutionSeen: false, feedbackSeen: false };
+let ticks = 0;
+let remaining = 0;
+function context() {
+  return { arrivals: Number(element('arrivals').value), service: Number(element('service').value), initialQueue: 0 };
+}
+function render() {
+  const parameters = context();
+  element('arrivals-value').textContent = parameters.arrivals;
+  element('service-value').textContent = parameters.service;
+  element('experiment-status').textContent = `第${ticks}轮结束，剩余${remaining}个任务。`;
+  const queue = element('queue');
+  queue.replaceChildren();
+  for (let index = 0; index < Math.min(remaining, 24); index += 1) {
+    const task = document.createElement('span');
+    task.className = 'task';
+    queue.append(task);
+  }
+}
+function resetExperiment() {
+  ticks = 0;
+  remaining = 0;
+  render();
+}
+function record(questionId, skillId, response, assessment, evidence) {
+  attempts.push({ attemptId: makeId(), questionId, skillId, response, context: context(),
+    hintUsed: evidence.hintUsed, solutionSeenBefore: evidence.solutionSeen,
+    feedbackSeenBefore: evidence.feedbackSeen, submittedAt: new Date().toISOString(), assessment });
+  element('attempt-count').textContent = `已记录${attempts.length}次作答。`;
+  element('export').disabled = false;
+}
+function predictionBasis(parameters) {
+  const expected = Math.max(0, parameters.arrivals - parameters.service);
+  return { expected, text: `空队列加入${parameters.arrivals}个任务，再处理最多${parameters.service}个，剩余${expected}个。` };
+}
+for (const id of ['arrivals', 'service']) {
+  element(id).addEventListener('input', () => {
+    resetExperiment();
+    element('prediction').value = '';
+    element('prediction-feedback').textContent = '参数已改变，请按新参数预测；旧作答和提示记录仍保留。';
+  });
+}
+element('prediction-hint').addEventListener('toggle', () => {
+  if (element('prediction-hint').open) exposure.hintUsed = true;
+});
+element('show-solution').addEventListener('click', () => {
+  exposure.solutionSeen = true;
+  element('prediction-feedback').textContent = predictionBasis(context()).text;
+});
+element('prediction-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const response = element('prediction').value;
+  if (!/^\d+$/.test(response.trim()) || !Number.isSafeInteger(Number(response))) {
+    element('prediction-feedback').textContent = '请输入非负整数。';
+    return;
+  }
+  // Opening a hint counts even if its asynchronous toggle event has not fired yet.
+  exposure.hintUsed ||= element('prediction-hint').open;
+  const basis = predictionBasis(context());
+  const correct = Number(response) === basis.expected;
+  record('predict-queue-01', 'queue-balance', response,
+    { source: 'local-rule', outcome: correct ? 'correct' : 'incorrect', basis: basis.text }, exposure);
+  exposure.feedbackSeen = true;
+  element('prediction-feedback').textContent = `${correct ? '本题预测正确。' : '本题预测与模型不符。'}${basis.text}可以推进实验核对。`;
+});
+element('step').addEventListener('click', () => {
+  const parameters = context();
+  remaining = Math.max(0, remaining + parameters.arrivals - parameters.service);
+  ticks += 1;
+  // Seeing a first-round result exposes the numeric answer just like written feedback.
+  exposure.feedbackSeen = true;
+  render();
+});
+element('reset').addEventListener('click', resetExperiment);
+element('reflection-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const response = element('reflection').value;
+  if (!response.trim()) return;
+  record('explain-backpressure-01', 'queue-transfer', response,
+    { source: 'pending-agent', outcome: 'ungraded', basis: '需结合原理、适用条件和理由评阅，未自动判定掌握' },
+    { hintUsed: false, solutionSeen: false, feedbackSeen: false });
+  element('reflection-feedback').textContent = '已记录原始回答，等待 Agent 评阅；重复提交仍会保留为新的尝试。';
+});
+element('export').addEventListener('click', () => {
+  const data = { ...lesson, sessionId, exportedAt: new Date().toISOString(), attempts };
+  const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${lesson.lessonId}-${sessionId}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  element('export-feedback').textContent = '已请求下载。请确认文件已保存，再把路径交给 Agent；结果尚未自动同步。';
+});
+render();
+</script>
+</body>
+</html>

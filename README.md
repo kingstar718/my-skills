@@ -1,7 +1,7 @@
 # my-skills
 
 供 Codex、Claude Code 和 Pi 使用的个人 Skill 集合，
-涵盖需求开发、测试、Git 提交、中文写作、博客发布与工具经验复用。
+涵盖需求开发、测试、Git 提交、中文写作、博客发布、交互学习与工具经验复用。
 `my-statusline` 仅适用于 Claude Code。
 
 ## 包含的 Skill
@@ -24,6 +24,8 @@
   复用发布记录并读回验证。
 - [`my-interview`](plugins/my-skills/skills/my-interview/SKILL.md)：基于本地 interview-wiki 题库练习算法与后端八股，
   支持练习和模拟面试，复用已有档案记录掌握证据并安排复习。
+- [`my-learn`](plugins/my-skills/skills/my-learn/SKILL.md)：研究新知识并连接已有概念，
+  生成 HTML 交互课程，依据真实练习表现调整难度、补齐短板并跨会话续学。
 - [`my-statusline`](plugins/my-skills/skills/my-statusline/SKILL.md)：配置 Claude Code 底部状态栏，
   显示模型、目录、Git 分支、上下文用量与订阅用量。
 
@@ -40,7 +42,7 @@
 npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code
 ```
 
-在交互界面选择除 `my-statusline` 外的9个技能，并选择链接安装(Symlink)。
+在交互界面选择除 `my-statusline` 外的10个技能，并选择链接安装(Symlink)。
 安装器维护共享内容与客户端入口：Codex、Pi 读取 `~/.agents/skills/`，
 Claude Code 通过 `~/.claude/skills/` 中的链接读取。
 
@@ -83,6 +85,24 @@ npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code --skill co
 插件或 Pi 包安装的用户沿用原更新方式，并检查旧名称是否已移除。
 仓库外 `AGENTS.md`、调用命令和配置中显式引用旧名称的地方需同步修改；
 学习档案和 env-tool-log 本机数据无需搬移。
+
+### 新增学习技能
+
+已安装旧版集合时，需要显式安装新增入口；普通更新不会自动选择此前未安装的技能：
+
+```bash
+npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code --skill my-learn
+```
+
+发布包含该技能的版本后执行，客户端仅选择自己实际使用的。调用示例：
+
+```text
+使用 $my-learn 帮我学习线程池，目标是能解释积压并选择合适的队列策略。
+```
+
+课程与个人档案保存在学习工作区，不在技能安装目录。
+HTML 支持本地实验和作答导出；将结果文件交给 Agent 后，它才能分析表现、安排下一课。
+此方式不要求模型后端，网页本身不会持续生成新题或自动同步学习进度。
 
 ## 客户端安装方式(可选)
 
@@ -127,7 +147,7 @@ pi -e .
 ```
 
 安装或更新后执行 `/reload` 或新建会话。
-`package.json` 排除 Claude Code 专用的 `my-statusline`，Pi 加载其余9个 Skill。
+`package.json` 排除 Claude Code 专用的 `my-statusline`，Pi 加载其余10个 Skill。
 
 ## 工具经验复用
 
