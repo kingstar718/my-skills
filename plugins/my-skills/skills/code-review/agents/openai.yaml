@@ -1,0 +1,4 @@
+interface:
+  display_name: "code-review"
+  short_description: "分别审查代码质量与需求符合度，核对验证证据，按需进行工程复盘或代码任务交接"
+  default_prompt: "使用 $code-review 审查当前改动，固定差异范围，分别核对代码质量与需求符合度，并报告有证据的发现及验证缺口。"

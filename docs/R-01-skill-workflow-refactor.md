@@ -6,6 +6,10 @@
 - 更新时间：2026-10-22
 - 登记：[需求索引](project.md)
 
+技能名称和扩展范围由[需求(R-05)](R-05-skill-capability-consolidation.md)承接：
+`spec-coding` 迁移为 `code-spec`，`spring-testing` 迁移为 `code-test`。
+本文保留原有验收及历史验证依据，单份规格、渐进审阅与 Spring 测试约束继续沿用。
+
 ## 背景与范围
 
 早期 `spec-coding` 将状态、需求、设计、任务、TDD 和回归强制放在单文件，容易让中大型需求不断

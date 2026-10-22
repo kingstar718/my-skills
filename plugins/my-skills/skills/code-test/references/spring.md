@@ -1,11 +1,8 @@
----
-name: spring-testing
-description: "Design, implement, organize, or review layered tests for Spring (Boot) projects. Select the lowest-cost layer that proves the behavior; decide when mocks, slices, real infrastructure, Testcontainers, isolated clusters, or black-box E2E are appropriate. Do not use for generic requirement tracking or non-Spring test suites."
----
+# Spring 专项测试
 
-# Spring 项目测试
+通用测试原则与场景选择见 [code-test](../SKILL.md)；本页仅在 Spring 测试任务中读取。
 
-为 Spring（Boot）项目设计并落地分层测试。先识别要证明的行为和风险，再选择足够真实且成本最低的
+为 Spring Boot 项目设计并落地分层测试。先识别要证明的行为和风险，再选择足够真实且成本最低的
 测试层级。测试位置遵循仓库结构，不用模块名代替测试语义。
 
 ## 测试分层与落点
@@ -33,17 +30,17 @@ description: "Design, implement, organize, or review layered tests for Spring (B
 - **配置中心**：默认用测试属性或配置桩。只有配置加载、group/namespace 隔离或热更新本身是目标时，
   才连接真实配置中心。
 - **无 Docker**：根据目标在远程容器、嵌入式服务、隔离环境和纯 mock 之间选择，记录没有覆盖的风险。
-  详见 [docker-host-options.md](references/docker-host-options.md)。
+  详见 [docker-host-options.md](docker-host-options.md)。
 
-## 落地流程（按需读引用）
+## 落地流程(按需读引用)
 
 1. 盘点要证明的行为、失败模式和现有测试结构。
 2. 从 Tier 1 开始，只有当前层无法证明风险时才上移。
-3. MVC 切片的隔离与上下文陷阱见 [slice-tests.md](references/slice-tests.md)。
-4. 真实数据库/Redis 等集成方式见 [testcontainers-integration.md](references/testcontainers-integration.md)。
-5. 黑盒 HTTP 测试和环境门禁见 [e2e-pytest.md](references/e2e-pytest.md)。
+3. MVC 切片的隔离与上下文陷阱见 [slice-tests.md](slice-tests.md)。
+4. 真实数据库/Redis 等集成方式见 [testcontainers-integration.md](testcontainers-integration.md)。
+5. 黑盒 HTTP 测试和环境门禁见 [e2e-pytest.md](e2e-pytest.md)。
 6. 仅当项目依赖 `com.sf.lbs.cloud.*` 且命中对应问题时，读取
-   [lbs-cloud-service-test.md](references/lbs-cloud-service-test.md)。
+   [lbs-cloud-service-test.md](lbs-cloud-service-test.md)。
 
 ## 工程约定
 

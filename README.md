@@ -6,21 +6,24 @@
 
 ## 包含的 Skill
 
-- [`spec-coding`](plugins/my-skills/skills/spec-coding/SKILL.md)：登记需求、定义验收标准并跟进验证。
-  默认在单份需求 Markdown 中维护；用户明确要求或部分内容确需独立维护时才拆分。
-- [`spring-testing`](plugins/my-skills/skills/spring-testing/SKILL.md)：为 Spring 项目选择并实现单元测试、
-  切片测试、基础设施集成测试与端到端测试，按行为和风险选择验证层级。
+- [`code-spec`](plugins/my-skills/skills/code-spec/SKILL.md)：澄清代码需求、核对业务术语，
+  按需调研、原型与拆任务，默认在单份需求 Markdown 中维护规则和验收证据。
+- [`code-test`](plugins/my-skills/skills/code-test/SKILL.md)：按行为和风险选择跨技术栈测试，
+  建立复现、诊断故障并回归；Spring 分层与基础设施经验按需读取。
+- [`code-review`](plugins/my-skills/skills/code-review/SKILL.md)：分别审查代码质量与需求符合度，
+  核对验证证据和影响范围，按需进行工程复盘或代码任务交接。
 - [`git-commit-convention`](plugins/my-skills/skills/git-commit-convention/SKILL.md)：检查提交范围，
   生成中文 Conventional Commits 提交说明，仅在用户授权时暂存和提交。
 - [`env-tool-log`](plugins/my-skills/skills/env-tool-log/SKILL.md)：复用 shell 与内置工具的经验，
   同类错误原位更新，修复后保留预防规则。
-- [`cn-writing`](plugins/my-skills/skills/cn-writing/SKILL.md)：规范中文技术写作的行文、结构、标点与 Markdown 源码换行。
+- [`cn-writing`](plugins/my-skills/skills/cn-writing/SKILL.md)：规范中文技术写作的行文、结构、标点与源码换行；
+  编写 Agent 文档时按需检查引用触发、完成条件和信息层级。
 - [`my-blog-build`](plugins/my-skills/skills/my-blog-build/SKILL.md)：为 mars-blog 编写或修改内容，
   通过内容 API 上传并触发 Cloudflare Pages 构建。
 - [`my-note-publish`](plugins/my-skills/skills/my-note-publish/SKILL.md)：通过博客内容 API 发布无标题随记或保存草稿，
   复用发布记录并读回验证。
 - [`my-interview`](plugins/my-skills/skills/my-interview/SKILL.md)：基于本地 interview-wiki 题库练习算法与后端八股，
-  支持练习和模拟面试。
+  支持练习和模拟面试，复用已有档案记录掌握证据并安排复习。
 - [`my-statusline`](plugins/my-skills/skills/my-statusline/SKILL.md)：配置 Claude Code 底部状态栏，
   显示模型、目录、Git 分支、上下文用量与订阅用量。
 
@@ -37,7 +40,7 @@
 npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code
 ```
 
-在交互界面选择除 `my-statusline` 外的8个技能，并选择链接安装(Symlink)。
+在交互界面选择除 `my-statusline` 外的9个技能，并选择链接安装(Symlink)。
 安装器维护共享内容与客户端入口：Codex、Pi 读取 `~/.agents/skills/`，
 Claude Code 通过 `~/.claude/skills/` 中的链接读取。
 
@@ -62,6 +65,24 @@ npx skills update -g
 更新命令会处理该安装器管理的全部全局技能，不限于本仓库；
 原有插件市场或 Pi 包安装的副本仍由各自安装方式维护。
 完整选项见 [skills CLI 命令说明](https://github.com/vercel-labs/skills/blob/main/docs/commands.md)。
+
+### 从旧技能名称迁移
+
+`spec-coding` 已改为 `code-spec`，`spring-testing` 已改为 `code-test`，另新增 `code-review`。
+源码不保留旧技能入口；原需求记录中的旧名称只用于追溯迁移来源。
+
+使用 skills CLI 安装的用户，发布新版后先移除这两个旧名称，再安装新入口：
+
+```bash
+npx skills remove spec-coding spring-testing -g
+npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code --skill code-spec code-test code-review
+```
+
+只选择实际使用的客户端；其他已安装技能继续通过 `skills update` 更新。
+改名或新增技能不能只依赖旧名称的更新检查，应显式安装新入口。
+插件或 Pi 包安装的用户沿用原更新方式，并检查旧名称是否已移除。
+仓库外 `AGENTS.md`、调用命令和配置中显式引用旧名称的地方需同步修改；
+学习档案和 env-tool-log 本机数据无需搬移。
 
 ## 客户端安装方式(可选)
 
@@ -106,7 +127,7 @@ pi -e .
 ```
 
 安装或更新后执行 `/reload` 或新建会话。
-`package.json` 排除 Claude Code 专用的 `my-statusline`，Pi 加载其余8个 Skill。
+`package.json` 排除 Claude Code 专用的 `my-statusline`，Pi 加载其余9个 Skill。
 
 ## 工具经验复用
 

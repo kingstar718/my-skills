@@ -28,6 +28,9 @@ marketplace 的基础版本一致；Codex 本地迭代所需的 cachebuster 通�
 
 ## Skill 约定
 
+代码工作流入口为 `code-spec`、`code-test`、`code-review`，按需求、验证与审阅场景分别使用。
+`cn-writing` 与 `my-interview` 保留独立入口；已改名的旧技能不再作为兼容副本分发。
+
 - `SKILL.md` 保留触发条件、核心决策和资源路由；条件性细节放 `references/`。
 - `assets/` 是生成产物使用的模板，不作为默认加载的完整说明书。
 - 描述要能准确区分适用任务，避免把项目特例提升为通用规则。
@@ -57,4 +60,5 @@ marketplace 的基础版本一致；Codex 本地迭代所需的 cachebuster 通�
 同时检查 JSON/YAML 可解析、相对链接存在，以及各客户端 manifest 与 marketplace 的基础版本一致。
 Pi 清单改动还需确认解析出的技能集合符合预期（Pi 包清单与设置项都用 `!`/`+`/`-` 前缀做筛选，
 其中 `!` 模式的匹配不做 `./` 归一化，路径需写成 `-./path` 或 `!path`）。需要让 Codex
-加载本地改动时，按 plugin-creator 的 cachebuster + reinstall 流程操作，并在新会话验证。
+加载本地改动时，按当前安装方式更新并在新会话验证：共享 skills 安装需显式处理改名，
+插件安装按可用的插件更新流程操作；不手改缓存。安装与发布需有任务授权。

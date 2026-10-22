@@ -1,0 +1,4 @@
+interface:
+  display_name: "code-spec"
+  short_description: "澄清代码需求、核对业务术语，以单份规格管理任务、验收与当前验证证据"
+  default_prompt: "使用 $code-spec 跟进这个代码需求，核实已有事实，按需澄清并在单份需求 Markdown 中维护任务与验收证据。"
