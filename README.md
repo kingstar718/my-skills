@@ -24,7 +24,48 @@
 - [`my-statusline`](plugins/my-skills/skills/my-statusline/SKILL.md)：配置 Claude Code 底部状态栏，
   显示模型、目录、Git 分支、上下文用量与订阅用量。
 
-## 安装
+## 统一安装与更新
+
+使用 [skills CLI](https://github.com/vercel-labs/skills) 为多个客户端安装同一套技能。
+需要 Node.js 22.20 或更高版本；其他机器也可直接运行以下命令，无需手动克隆仓库或创建目录联接。
+
+### 安装
+
+为 Codex、Pi 和 Claude Code 全局安装通用技能：
+
+```bash
+npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code
+```
+
+在交互界面选择除 `my-statusline` 外的8个技能，并选择链接安装(Symlink)。
+安装器维护共享内容与客户端入口：Codex、Pi 读取 `~/.agents/skills/`，
+Claude Code 通过 `~/.claude/skills/` 中的链接读取。
+
+Claude Code 的状态栏技能单独安装：
+
+```bash
+npx skills add kingstar718/my-skills -g -a claude-code --skill my-statusline
+```
+
+安装后新建会话，Pi 也可执行 `/reload`。
+从下方客户端安装方式切换时，移除或停用原有 my-skills 加载入口，避免重复加载。
+
+### 检查与更新
+
+```bash
+npx skills list -g
+npx skills check
+npx skills update -g
+```
+
+以上依次列出全局技能、检查可用更新、更新全局技能。
+更新命令会处理该安装器管理的全部全局技能，不限于本仓库；
+原有插件市场或 Pi 包安装的副本仍由各自安装方式维护。
+完整选项见 [skills CLI 命令说明](https://github.com/vercel-labs/skills/blob/main/docs/commands.md)。
+
+## 客户端安装方式(可选)
+
+以下方式与统一安装二选一，也可用于客户端专用安装或本地开发。
 
 ### Codex
 
