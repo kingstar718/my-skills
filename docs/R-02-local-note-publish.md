@@ -7,8 +7,14 @@
 新增 `my-note-publish` skill、Python 标准库发布脚本及离线接口测试，接入 my-skills 插件。
 支持首次配置、保存草稿、预览、发布记录复用、冲突检查和保存后读回验证。
 更新 my-blog-build 随记入口及中文写作资源链接，技能界面名称统一为英文标识。
-Codex、Claude Code manifest 和 Claude marketplace 的基础版本统一为 1.11.3。
+本需求上线时，Codex、Claude Code manifest 和 Claude marketplace 的基础版本统一为 1.11.3。
 不修改博客服务端，不增加 MCP，不上传图片，不自动修改或删除已发布内容。
+
+关联需求：
+
+- 与[需求(R-01)](R-01-skill-workflow-refactor.md)共享 cn-writing，发布行为仍按本文验收标准执行。
+- [需求(R-03)](R-03-pi-package.md)后续将清单基础版本统一为1.12.0，替代本文范围中的1.11.3版本记录；
+  不替代正文发布、凭据或重试规则。本文的历史验证证据仍对应本需求上线时的版本。
 
 ## 验收标准与验证
 

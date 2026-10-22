@@ -1,4 +1,4 @@
 interface:
   display_name: "spec-coding"
-  short_description: "用核心 spec、可测 AC 与验证证据跟进需求"
-  default_prompt: "使用 $spec-coding 登记并跟进这个需求，按复杂度选择紧凑或目录式 spec。"
+  short_description: "用单份需求 MD、验收标准与验证证据跟进需求"
+  default_prompt: "使用 $spec-coding 登记并跟进这个需求，默认用单份需求 Markdown 维护规则、设计要点与验证结果。"
