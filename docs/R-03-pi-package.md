@@ -7,14 +7,15 @@
 在仓库根新增 `package.json`，以 `pi` 键声明 Pi 包清单，`pi.skills` 指向 `plugins/my-skills/skills`，
 并用 `-` 排除项去掉 Claude Code 专用的 `my-statusline`。
 README 增加 Pi 安装章节，AGENTS.md 登记 Pi manifest 入口与校验要求。
-Codex manifest、Claude Code manifest、Claude marketplace 与 Pi 清单的基础版本统一为 1.12.0。
+本需求上线时，Codex manifest、Claude Code manifest、Claude marketplace 与 Pi 清单的基础版本统一为1.12.0。
 不修改任何 skill 正文，不改动 Codex、Claude Code、ZCode 的既有安装方式，不新增运行时依赖。
 
 关联需求：
 
 - 扩展[需求(R-02)](R-02-local-note-publish.md)沿用的插件目录及接入方式，新增 Pi 包入口。
 - 本文的1.12.0清单版本替代需求(R-02)范围中的1.11.3记录，发布脚本业务规则保持独立。
-- 与[需求(R-01)](R-01-skill-workflow-refactor.md)共享元数据范围；需求(R-01)本轮不修改 Pi 清单。
+- [需求(R-01)](R-01-skill-workflow-refactor.md)后续将各清单基础版本统一到2.0.0，
+  替代本文的版本约定；Pi技能选择规则及历史验证证据保持原适用范围。
 
 ## 验收标准与验证
 
