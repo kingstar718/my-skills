@@ -4,11 +4,12 @@ import argparse
 import json
 import os
 import sys
-from collections import Counter
 from datetime import datetime, timedelta
 
 DATA_DIR_ENV = "ENV_TOOL_LOG_DIR"
-DEFAULT_DATA_DIR = os.path.join(os.path.expanduser("~"), ".codex", "skills-data", "env-tool-log")
+DEFAULT_DATA_DIR = os.path.join(os.path.expanduser("~"), ".my-skills", "env-tool-log")
+LEGACY_DATA_DIR = os.path.join(os.path.expanduser("~"), ".codex", "skills-data", "env-tool-log")
+_legacy_notice_shown = False
 FAILURES_FILE = "failures.jsonl"
 ARCHIVE_FILE = "failures-archive.jsonl"
 LESSONS_FILE = "lessons.md"
@@ -19,7 +20,19 @@ CATEGORIES = ["env", "syntax", "args", "path", "network", "api", "auth", "other"
 
 
 def data_dir() -> str:
-    d = os.environ.get(DATA_DIR_ENV) or DEFAULT_DATA_DIR
+    global _legacy_notice_shown
+    override = os.environ.get(DATA_DIR_ENV)
+    d = override or DEFAULT_DATA_DIR
+    if not override and not _legacy_notice_shown:
+        legacy_files = [FAILURES_FILE, ARCHIVE_FILE, LESSONS_FILE, "env-snapshot.json"]
+        if any(os.path.isfile(os.path.join(LEGACY_DATA_DIR, name)) for name in legacy_files):
+            print(
+                f"env-tool-log: 检测到旧数据目录 {LEGACY_DATA_DIR}；"
+                f"当前使用 {DEFAULT_DATA_DIR}。请审阅后迁移，或通过 ENV_TOOL_LOG_DIR 指定旧目录；"
+                "未自动搬移、合并或读取旧数据。",
+                file=sys.stderr,
+            )
+            _legacy_notice_shown = True
     os.makedirs(d, exist_ok=True)
     return d
 
@@ -52,8 +65,8 @@ def read_entries(path=None) -> list:
     return entries
 
 
-def write_entries(entries: list) -> None:
-    with open(failures_path(), "w", encoding="utf-8") as f:
+def write_entries(entries: list, path=None) -> None:
+    with open(path or failures_path(), "w", encoding="utf-8") as f:
         for e in entries:
             f.write(json.dumps(e, ensure_ascii=False) + "\n")
 
@@ -76,7 +89,7 @@ def find_sig(sig: str, entries=None) -> dict:
     if not sig:
         return None
     entries = entries if entries is not None else read_entries()
-    for e in entries:
+    for e in reversed(entries):
         if (e.get("sig") or "").strip().lower() == sig:
             return e
     return None
@@ -89,21 +102,46 @@ def add_entry(args=None, entry: dict = None) -> dict:
     sig = entry.get("sig") or (getattr(args, "sig", None) if args else None)
     if not cmd or not sig:
         return {"error": "cmd and sig are required"}
-    existing = find_sig(sig)
-    if existing and existing.get("status") == STATUS_OPEN:
-        return {"duplicate": existing}
-    category = entry.get("category") or (getattr(args, "category", None) if args else None) or "other"
+    def value(name, default=""):
+        return entry.get(name) or (getattr(args, name + "_" if name == "from" else name, None) if args else None) or default
+
+    category = value("category", "other")
     if category not in CATEGORIES:
         category = "other"
-    e = append_entry({
-        "cmd": str(cmd),
-        "sig": str(sig),
-        "category": category,
-        "cause": entry.get("cause") or (getattr(args, "cause", "") if args else "") or "",
-        "fix": entry.get("fix") or (getattr(args, "fix", "") if args else "") or "",
-        "from": entry.get("from") or (getattr(args, "from_", None) if args else None) or "codex",
-    })
-    return {"added": e}
+    incoming = {
+        "cmd": str(cmd), "sig": str(sig).strip(), "category": category,
+        "cause": value("cause"), "fix": value("fix"), "from": value("from", "codex"),
+        "tool": value("tool") or str(cmd).split()[0],
+    }
+    entries = read_entries()
+    archived = read_entries(archive_path())
+    key = str(sig).strip().lower()
+    matches = [e for e in archived + entries if (e.get("sig") or "").strip().lower() == key]
+    if matches:
+        current = dict(matches[-1])
+        current["ts"] = matches[0].get("ts", now())
+        current["count"] = sum(e.get("count", 1) for e in matches) + 1
+        for old in reversed(matches):
+            verified = old.get("verified_fix") or (old.get("fix") if old.get("status") == STATUS_FIXED else "")
+            if verified:
+                current["verified_fix"] = verified
+                break
+        for name, val in incoming.items():
+            if val:
+                current[name] = val
+        current["status"] = STATUS_OPEN
+        current["last_seen"] = now()
+        entries = [e for e in entries if (e.get("sig") or "").strip().lower() != key]
+        entries.append(current)
+        write_entries(entries)
+        if any((e.get("sig") or "").strip().lower() == key for e in archived):
+            write_entries([e for e in archived if (e.get("sig") or "").strip().lower() != key], archive_path())
+        lessons(apply=True)
+        return {"duplicate": current}
+    incoming.update(count=1, last_seen=now())
+    added = append_entry(incoming)
+    lessons(apply=True)
+    return {"added": added}
 
 
 def mark_fixed(sig: str, fix: str = "") -> int:
@@ -111,14 +149,17 @@ def mark_fixed(sig: str, fix: str = "") -> int:
     updated = 0
     sig = (sig or "").strip().lower()
     for e in entries:
-        if (e.get("sig") or "").strip().lower() == sig:
+        if (e.get("sig") or "").strip().lower() == sig and e.get("status") == STATUS_OPEN:
             e["status"] = STATUS_FIXED
             e["ts_fixed"] = now()
             if fix:
                 e["fix"] = fix
+            if e.get("fix"):
+                e["verified_fix"] = e["fix"]
             updated += 1
     if updated:
         write_entries(entries)
+        lessons(apply=True)
     return updated
 
 
@@ -131,6 +172,9 @@ def query(pattern: str = "", include_fixed: bool = False, limit: int = 20) -> li
             if p in (e.get("cmd") or "").lower()
             or p in (e.get("sig") or "").lower()
             or p in (e.get("cause") or "").lower()
+            or p in (e.get("fix") or "").lower()
+            or p in (e.get("verified_fix") or "").lower()
+            or p in (e.get("tool") or "").lower()
         ]
     if not include_fixed:
         entries = [e for e in entries if e.get("status") == STATUS_OPEN]
@@ -172,31 +216,55 @@ def prune(older_days: int = 90, max_entries: int = 500) -> dict:
     return {"archived": len(archived), "remaining": len(keep)}
 
 
-def lessons(apply: bool = False, limit: int = 8) -> dict:
-    entries = read_entries()
-    fixed = [e for e in entries if e.get("status") == STATUS_FIXED and (e.get("cause") or e.get("fix"))]
-    cat_counter = Counter(e.get("category", "other") for e in fixed)
-    words = []
-    for e in fixed:
-        text = " ".join([e.get("cause", ""), e.get("fix", "")])
-        for token in text.replace("，", " ").replace("。", " ").replace(",", " ").replace("；", " ").split():
-            if len(token) >= 2:
-                words.append(token.lower())
-    kw = Counter(words).most_common(limit)
-    lines = [f"## 教训（{now()} 自动提炼）", ""]
-    if cat_counter:
-        lines.append("按类别统计：")
-        for cat, n in cat_counter.most_common():
-            lines.append(f"- {cat}: {n} 条")
+def lessons(apply: bool = False, limit: int = 0) -> dict:
+    latest = {}
+    for entry in read_entries(archive_path()) + read_entries():
+        key = (entry.get("sig") or "").strip().lower()
+        if key:
+            latest[key] = entry
+    fixed = [e for e in latest.values()
+             if e.get("verified_fix") or (e.get("status") == STATUS_FIXED and (e.get("fix") or "").strip())]
+    if limit:
+        fixed = fixed[-limit:]
+
+    def inline(value):
+        return " ".join(str(value or "").split())
+
+    groups = {}
+    for entry in fixed:
+        tool = inline(entry.get("tool")) or inline(entry.get("cmd")).split(" ")[0] or "未分类"
+        groups.setdefault(tool, []).append(entry)
+    lines = ["## 工具经验索引", ""]
+    for tool, entries in sorted(groups.items()):
+        lines.extend([f"### {tool}", ""])
+        for entry in entries:
+            trigger = inline(entry.get("sig"))
+            cause = inline(entry.get("cause"))
+            fix = inline(entry.get("verified_fix") or entry.get("fix"))
+            condition = trigger + ("；" + cause if cause else "")
+            status = "（复发待复核）" if entry.get("status") == STATUS_OPEN else ""
+            lines.append(f"- **触发条件**：{condition} → **做法**：{fix}{status}")
         lines.append("")
-    lines.append("高频关键词（来自已修复记录）：")
-    for w, n in kw:
-        lines.append(f"- `{w}` x{n}")
+    if not fixed:
+        lines.append("暂无包含已验证修复方法的记录。")
     snippet = "\n".join(lines) + "\n"
     if apply:
         lp = os.path.join(data_dir(), LESSONS_FILE)
-        with open(lp, "a", encoding="utf-8") as f:
-            f.write(snippet)
+        begin = "<!-- env-tool-log:lessons:start -->"
+        end = "<!-- env-tool-log:lessons:end -->"
+        previous = ""
+        if os.path.exists(lp):
+            with open(lp, encoding="utf-8") as f:
+                previous = f.read()
+        block = begin + "\n" + snippet + end
+        start = previous.find(begin)
+        finish = previous.find(end, start) if start >= 0 else -1
+        if start >= 0 and finish >= 0:
+            updated = previous[:start] + block + previous[finish + len(end):]
+        else:
+            updated = previous + ("\n\n" if previous else "") + block + "\n"
+        with open(lp, "w", encoding="utf-8") as f:
+            f.write(updated)
         return {"applied": lp, "snippet": snippet}
     return {"snippet": snippet}
 
@@ -260,6 +328,7 @@ def main() -> None:
     p_add = sub.add_parser("add", help="record a failure")
     p_add.add_argument("--cmd")
     p_add.add_argument("--sig")
+    p_add.add_argument("--tool", help="tool name, including built-in or MCP tools")
     p_add.add_argument("--cause", default="")
     p_add.add_argument("--fix", default="")
     p_add.add_argument("--category", default="other", choices=CATEGORIES)

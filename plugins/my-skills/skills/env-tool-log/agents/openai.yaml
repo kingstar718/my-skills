@@ -1,4 +1,4 @@
 interface:
   display_name: "env-tool-log"
-  short_description: "环境快照、工具调用规则与失败日志，避免重复踩坑，支持 Codex 与 Claude Code"
-  default_prompt: "帮我检查环境并避免重复踩工具调用失败的坑"
+  short_description: "共享 shell 与内置工具经验，同类错误原位维护"
+  default_prompt: "使用 $env-tool-log 在会话首次使用 shell 或内置工具时读取相关经验，同类错误维护唯一记录，验证修复后保留预防规则。"

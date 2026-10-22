@@ -1,36 +1,72 @@
 ---
 name: env-tool-log
-description: "Use when running shell commands, builds, dependency installs, environment configuration, or when a tool/command fails or behaves unexpectedly. Records the machine environment (JDK/Python/Node/npm/Maven versions and paths), logs tool-call failures with root causes to prevent repeating them, and provides tool-invocation rules for writing correct commands. Before executing, check tool rules → failure log → environment snapshot; after a failure, record it immediately. Works as Codex instructions and as Claude Code and ZCode hooks."
+description: "在使用 shell 或内置工具时，按共享经验索引复用命令规则、工具环境与已验证修复。覆盖 PowerShell/pwsh、文件读取、搜索、补丁编辑、浏览器和 MCP 等工具；同类错误只维护一条记录，复发原位更新，关闭后保留预防规则。"
 ---
 
 # Env Tool Log
 
-记录机器环境快照、工具调用失败日志和工具调用规则，避免重复踩坑。
+复用工具规则和本机环境信息，记录可复用的失败原因与已验证修复。
+shell 与内置工具都适用；会话首次使用时查看相关经验，之后复用已读规则。
 
-## 核心流程
+## 使用流程
 
-执行命令类任务时按顺序：
+1. **首次检查**
+   - 会话首次使用某工具前，读取共享 `lessons.md` 的对应工具章节；
+     无相关记录则正常使用。范围包括 shell、文件读取、搜索、补丁编辑、浏览器与 MCP。
+   - shell 命令另查相关[命令规则](references/tool-invocations.md)；
+     内置工具按自身 schema 和已确认经验调用，不强行套用 shell 规则。
+   - 读取索引与维护日志不递归触发首次检查；切换环境或出现意外错误时重新核对相关经验。
+   - 按命令或错误关键词执行 `fail_log.py query "关键词" --all --limit 5`；
+     同时看 OPEN 的未决问题与 FIXED 的解决方法，不把无关命中当作当前原因。
+   - 仅查看相关工具的环境快照；缺失、过期或环境变化时按
+     [快照规则](references/data-and-usage.md#环境快照)重新探测。
 
-1. **查规则**：读 `references/tool-invocations.md`；若数据目录存在 `lessons.md`（由 `fail_log.py lessons --apply` 生成）一并读。
-2. **查失败日志**：`python scripts/fail_log.py query "<命令关键词>"`，命中 OPEN 记录先看 cause/fix。
-3. **查环境快照**：`python scripts/snapshot_env.py --stdout`（或读 `env-snapshot.json`），确认工具真实路径和版本。
-4. **执行**：按规则的正确写法执行，设好超时。
-5. **失败立即记录**：`python scripts/fail_log.py add --cmd "..." --sig "<关键错误>" [--category X]`；修复成功后 `mark-fixed --sig "..."`。
+2. **执行与复用**
+   - 同一会话复用已确认的路径、版本和规则，环境未变化时不重复读取或探测。
+   - 数据目录沿用已配置的 `ENV_TOOL_LOG_DIR`，未配置时使用默认目录。
+     权限受限需临时覆盖时，说明原因、原目录和替代目录；后续调用保持一致。
+   - 读取日志或快照失败不阻断无关工作，不静默换目录重新积累记录。
 
-## 脚本
+3. **失败与闭环**
+   - 可复用的工具、参数或环境失败及时记录稳定签名、已知原因和修复方案。
+     同类错误复用原签名，更新次数、最近时间和当前状态，不因复发新增记录。
+     签名使用工具与稳定错误特征，不包含动态路径、时间戳或运单号；不同原因不按模糊文本合并。
+     原因未确认时保留为空或标明待确认，不把猜测写成事实。
+   - 修复重试通过后，对同一签名执行 `mark-fixed`，写入已验证的方法。
+     仅有候选方案或局部验证时保留 OPEN，并说明验证范围。
+     关闭不删除预防规则；复发时保留上次已验证方法并标明待复核，确认后原位修正。
+   - `add` 与 `mark-fixed` 自动更新按工具分类的经验索引，手工正文保留；
+     原因、修复方法或适用范围变化时更新原条目，不逐轮追加同类教训。
+   - 预期的 TDD 红灯、正常搜索无匹配和业务断言失败留在任务验证中；
+     工具无法正常执行测试时，才记录对应工具故障。
+   - 日志脚本自身失败时直接修正调用，不递归调用自身登记故障；
+     仍不可用时在任务中说明缺口，不让记录流程阻断已授权工作。
 
-- `scripts/snapshot_env.py`：探测工具版本+路径 → `env-snapshot.json`。
-- `scripts/fail_log.py`：`add` / `query` / `mark-fixed` / `prune` / `lessons`。
-- `scripts/cc_hooks.py` + `scripts/install_cc_hooks.py`：Claude Code 自动捕获与提示（可选）。
-- `scripts/zcode_hooks.py` + `scripts/install_zcode_hooks.py`：ZCode 自动捕获与提示（可选，`PostToolUseFailure` 为官方事件直记失败）。
+## 数据与脚本
 
-## 引用文档（按需读）
+默认数据目录为 `~/.my-skills/env-tool-log/`，由同一用户下的各 harness 共用，
+显式配置的 `ENV_TOOL_LOG_DIR` 优先。客户端记录来源由 `from` 字段区分；
+手工调用 `add` 时按当前客户端传入 `--from codex/cc/zcode/pi`，不把默认来源当作自动识别。
 
-- `references/tool-invocations.md`：工具调用规则（怎么写才对），含 `[BLOCK]` 高危规则。
-- `references/env-snapshot.md`：快照字段与刷新时机。
-- `references/failure-log.md`：记录字段、查询命令、生命周期、hook 说明。
+检测到旧版 `.codex` 数据时，仅向 stderr 提示旧目录与当前目录，不自动搬移、合并或读取。
+迁移前可通过环境变量明确沿用旧目录；确认迁移后，所有 harness 应统一使用新目录。
+旧目录处理见[迁移说明](references/data-and-usage.md#旧目录与迁移)。
+本机快照、日志和教训不入库、不随技能分发；不得写入凭据或敏感地址。
 
-## 数据目录
+- **经验索引**：`lessons.md` 按工具列出稳定签名、触发条件与当前做法；
+  关联日志中的同一签名。完整索引不按最近几条截断；hooks 注入的摘要不能代替相关章节。
+- **失败日志**：`scripts/fail_log.py` 提供记录、查询、关闭、归档和教训生成；
+  参数、分类与客户端 hooks 见[数据与使用](references/data-and-usage.md#记录与闭环)。
+- **环境快照**：`scripts/snapshot_env.py` 按需探测工具路径和版本；
+  刷新时机与字段见[环境快照](references/data-and-usage.md#环境快照)。
+- **客户端 hooks**：Claude Code 与 ZCode 安装脚本按需使用，不自动安装或修改客户端配置。
+  自动捕获的记录仍需核对是否为预期失败，并在实际修复后闭环。
 
-- 默认 `~/.codex/skills-data/env-tool-log/`，环境变量 `ENV_TOOL_LOG_DIR` 可覆盖。
-- 快照/日志/教训是机器本机数据，不入库、不随技能分发。
+## 跨 harness 接入
+
+在各 harness 支持的全局指令入口放入以下约定，具体文件名由客户端决定。
+skill 文件与共享数据本身不保证新会话自动加载；hooks 仅作为可选的读取入口。
+
+> 使用 shell 或内置工具前，会话首次使用该工具时读取共享 env-tool-log 经验索引的相关章节；
+> 已读取且环境未变化时复用。意外工具错误使用稳定签名登记，同类错误原位更新；
+> 修复验证后关闭记录并保留预防规则。

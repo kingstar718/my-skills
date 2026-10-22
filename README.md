@@ -4,7 +4,7 @@
 
 ## 包含的 Skill
 
-- `env-tool-log`：机器环境快照、工具调用失败日志与教训提炼，执行命令前查规则/失败日志，失败即记录避免重复踩坑；支持 Codex 与 Claude Code（hooks 自动捕获）。
+- `env-tool-log`：共享 shell 与内置工具经验索引，同类错误原位更新，修复后保留预防规则；支持 Codex 与可选 Claude Code/ZCode hooks。
 - `git-commit-convention`：提交前检查目标文件，生成中文 Conventional Commits message，并仅在 AI 身份明确时添加联署。
 - `cn-writing`：中文技术写作通用规范（标题、行文硬约束、禁用表达清单、结构、数字术语、代码示例、复验），my-blog-build 等写作类 skill 共用。
 - `my-blog-build`：mars-blog（CF Pages + R2）写作到发布的完整工作流（内容 API 上传、frontmatter 规范、触发重建，写作部分引用 cn-writing）。
