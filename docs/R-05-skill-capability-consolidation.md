@@ -1,5 +1,7 @@
 # 技能能力升级与收敛
 
+内容规范、Git 与面试等入口的后续改名见[需求(R-07)](R-07-skill-naming.md)；本文保留原验收和实施依据，能力职责继续有效。
+
 - **编号**：需求(R-05)
 - **状态**：待回归
 - **提出日期**：2026-10-22
@@ -58,11 +60,11 @@ PR 的前后证据、影响范围和回退难度说明归入 `code-review`。
 
 | 分组 | 当前已有能力 | 待补或待核对 | 主要修改入口 |
 | --- | --- | --- | --- |
-| 文档写作 | 中文行文、列表层级、语义换行及复验 | Agent 文档的引用触发、可观察完成条件和信息层级 | [cn-writing](../plugins/my-skills/skills/cn-writing/SKILL.md) |
+| 文档写作 | 中文行文、列表层级、语义换行及复验 | Agent 文档的引用触发、可观察完成条件和信息层级 | [cn-writing](../plugins/my-skills/skills/content-write/SKILL.md) |
 | 需求开发 | 需求查重、验收映射、单份规格、原位收敛 | 依赖式澄清、术语核对、行为拆分及研究与原型的适用条件 | [code-spec](../plugins/my-skills/skills/code-spec/SKILL.md)，原 `spec-coding` |
 | 测试与诊断 | Spring 分层、风险与成本选层、真实依赖边界 | 通用测试原则、其他技术栈选择、独立预期值和诊断循环 | [code-test](../plugins/my-skills/skills/code-test/SKILL.md)，原 `spring-testing` |
-| 代码审阅 | 提交范围与消息规范；工具经验按签名闭环 | 双角度审查、可选工程复盘与代码任务交接 | [code-review](../plugins/my-skills/skills/code-review/SKILL.md)，复用 [git-commit-convention](../plugins/my-skills/skills/git-commit-convention/SKILL.md) 与 [env-tool-log](../plugins/my-skills/skills/env-tool-log/SKILL.md) |
-| 面试学习 | 逐题 `log.md`、跨会话 `profile.md`、薄弱点与专题掌握 | 掌握证据与复习安排；核对专项参考中的已有规则，复用旧档案 | [my-interview](../plugins/my-skills/skills/my-interview/SKILL.md) |
+| 代码审阅 | 提交范围与消息规范；工具经验按签名闭环 | 双角度审查、可选工程复盘与代码任务交接 | [code-review](../plugins/my-skills/skills/code-review/SKILL.md)，复用 [git-commit-convention](../plugins/my-skills/skills/git-commit/SKILL.md) 与 [env-tool-log](../plugins/my-skills/skills/env-tool-log/SKILL.md) |
+| 面试学习 | 逐题 `log.md`、跨会话 `profile.md`、薄弱点与专题掌握 | 掌握证据与复习安排；核对专项参考中的已有规则，复用旧档案 | [my-interview](../plugins/my-skills/skills/interview/SKILL.md) |
 
 ## 验收标准
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "learn"
+  short_description: "研究新知识并连接已有概念，通过交互课程和动态练习逐步补齐短板"
+  default_prompt: "使用 $learn 帮我学习一个新技能，先确认目标和基础，再用交互课程与练习安排下一步。"

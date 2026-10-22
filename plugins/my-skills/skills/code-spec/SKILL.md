@@ -104,9 +104,9 @@ description: "澄清代码需求、核对业务术语并管理规格、任务与
 - **代码审查**：用户要求审查，或当前任务的质量风险需要专项审阅时，若 `code-review` 可用则调用；
   否则检查实际差异与验收。普通需求不自动执行审查、复盘和交接全流程。
 
-## 中文 Markdown
+## 内容表达与格式
 
-中文行文与源码换行遵循同包的 [cn-writing](../cn-writing/SKILL.md)。
+内容表达、结构和格式遵循同包的 [content-write](../content-write/SKILL.md)。
 
 ## 约束
 

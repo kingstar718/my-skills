@@ -1,12 +1,12 @@
 ---
-name: my-blog-build
+name: blog-publish
 description: 为 mars-blog（Cloudflare Pages + R2 静态站）生成/修改文章与随记并发布的完整工作流：通过内容 API 上传 markdown 到 R2、触发重建上线。当用户要求写新文章、修改现有文章、发短文/随记、构建博客或发布内容时使用。
 ---
 
-# my-blog-build
+# blog-publish
 
 从本地正文文件发布新随记或存随记草稿时，优先使用同插件的
-[my-note-publish](../my-note-publish/SKILL.md)，复用其发布脚本和重试记录；
+[blog-note-publish](../blog-note-publish/SKILL.md)，复用其发布脚本和重试记录；
 本 skill 继续负责长文、已有内容修改、图片上传及站点构建。
 
 面向 mars-blog（v3，Cloudflare Pages 静态化）的端到端写作与发布方案。覆盖内容规范、内容 API 上传、重建等待与校验全流程。
@@ -64,7 +64,7 @@ draft: false
 
 ### 写作规范
 
-**正文写作一律遵守通用写作 skill [`cn-writing`](../cn-writing/SKILL.md)——动笔前先读取该文件，再开始写作。** 其中「标题、行文硬约束、禁用表达清单、结构约束、数字与术语、代码与示例、复验清单」全部适用。
+**正文写作一律遵守通用写作 skill [`content-write`](../content-write/SKILL.md)——动笔前先读取该文件，再开始写作。** 其中「标题、行文硬约束、禁用表达清单、结构约束、数字与术语、代码与示例、复验清单」全部适用。
 
 下文只列站点特有的内容约定；frontmatter 见上方「Frontmatter Schema」。
 
@@ -73,7 +73,7 @@ draft: false
 - **标题层级**：正文从 `##` 开始，层级不超过 `####`
 - **链接**：站内文章用相对路径 `[标题](/posts/slug)`；外部链接 `[文字](https://...)`
 - **图片**：正文引用 `/media/<key>`，不写本地路径
-- **中文排版**：中英文之间加空格（标点规则、数字术语见 `cn-writing`）
+- **中文排版**：中英文之间加空格（标点规则、数字术语见 `content-write`）
 - **文件名 = slug**：小写英文 + 连字符（`my-post.md`）；中文标题交给 `title`，不进文件名。新文章编辑器产出的 slug 形如 `2026-08-25-1752000000000.md`（UTC 日期-毫秒时间戳）
 
 ### 标题标签（末尾 `#标签`）
@@ -165,5 +165,5 @@ PUT 返回 `{"ok":true}` 后轮询：`GET /api/content/posts/<slug>.md` 能读�
 - [ ] AI 生成/重写的文章 `title` 末尾有 ` #ai`，人写的没有
 - [ ] `updated` 已在修改时更新
 - [ ] 图片引用用 `/media/...`，不是本地路径
-- [ ] 已按 `cn-writing` 复验清单逐项检查（标题/禁用表达/数字术语/代码示例）
+- [ ] 已按 `content-write` 复验清单逐项检查（标题/禁用表达/数字术语/代码示例）
 - [ ] PUT 后 GET 读回确认内容、等待重建完成、页面可访问

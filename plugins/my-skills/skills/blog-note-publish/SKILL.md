@@ -1,6 +1,6 @@
 ---
-name: my-note-publish
-description: 从本地正文文件发布随记到支持 /api/content/notes 的博客，生成无标题 Markdown、复用发布 ID、上传后读回校验。用于发随记、短文或保存随记草稿；长文与站点构建使用 my-blog-build。
+name: blog-note-publish
+description: 从本地正文文件发布随记到支持 /api/content/notes 的博客，生成无标题 Markdown、复用发布 ID、上传后读回校验。用于发随记、短文或保存随记草稿；长文与站点构建使用 blog-publish。
 ---
 
 # 本地发布随记
@@ -26,8 +26,8 @@ description: 从本地正文文件发布随记到支持 /api/content/notes 的�
 ## 发布流程
 
 1. 识别用户是要发布、存草稿还是只写正文。用户已明确要求发布时直接执行；只要求写作时停在准备阶段。
-2. 用户提供完整正文时保留原文；需要生成或润色中文时读取同插件的
-   [cn-writing](../cn-writing/SKILL.md)。随记没有标题，不添加长文的 `#ai` 标题标签。
+2. 用户提供完整正文时保留原文；需要生成或润色正文时读取同插件的
+   [content-write](../content-write/SKILL.md)。随记没有标题，不添加长文的 `#ai` 标题标签。
 3. 把正文写入 UTF-8 文件，运行 `scripts/publish_note.py prepare --file <正文文件> --out <发布记录.json>`。
    脚本生成唯一文件名、带偏移的 UTC 发布时间和完整 Markdown；草稿加 `--draft`。
    用户指定时间时用 `--pub-datetime` 传 ISO8601 时间，必须带 `Z` 或明确偏移。
@@ -38,7 +38,7 @@ description: 从本地正文文件发布随记到支持 /api/content/notes 的�
    仅表示重建请求成功，页面通常还需约 1–2 分钟更新。草稿不会公开展示。
 
 不要把本地正文文件当作 R2 的内容真相源。发布记录保留在用户工作目录或临时目录，不能写进插件源码。
-正文中的图片应使用已有 `/media/...` 地址；上传图片和修改已发布内容交给 `my-blog-build`。
+正文中的图片应使用已有 `/media/...` 地址；上传图片和修改已发布内容交给 `blog-publish`。
 
 ## 失败处理
 

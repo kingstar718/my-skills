@@ -29,12 +29,14 @@ marketplace 的基础版本一致；Codex 本地迭代所需的 cachebuster 通�
 ## Skill 约定
 
 代码工作流入口为 `code-spec`、`code-test`、`code-review`，按需求、验证与审阅场景分别使用。
-`cn-writing`、`my-interview` 与 `my-learn` 保留独立入口；已改名的旧技能不再作为兼容副本分发。
-`my-learn` 负责通用学习和交互课程，`my-interview` 保留题库与面试训练；学习数据不随技能分发。
+`content-write`、`interview` 与 `learn` 保留独立入口；已改名的旧技能不再作为兼容副本分发。
+`learn` 负责通用学习和交互课程，`interview` 保留题库与面试训练；学习数据不随技能分发。
 
 - `SKILL.md` 保留触发条件、核心决策和资源路由；条件性细节放 `references/`。
 - `assets/` 是生成产物使用的模板，不作为默认加载的完整说明书。
 - 描述要能准确区分适用任务，避免把项目特例提升为通用规则。
+- 技能名直接表达用途；博客入口使用 `blog-`，不要求名称附带个人前缀或角色后缀。
+  入口改名时同步目录、元数据、调用与清单；个人配置和数据路径独立维护，不随改名迁移。
 - 修改 `SKILL.md` 时同步检查 `agents/openai.yaml`，默认提示必须显式提到 `$skill-name`。
 - 不为单个项目写死模块名、机器路径、环境地址、凭据、错误码或依赖版本。
 

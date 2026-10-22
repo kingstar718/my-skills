@@ -89,4 +89,4 @@ interview-wiki 用 Quartz shortest 语义，链接**按文件名全库唯一匹�
 - 首选纯文件名：`[JVM](JVM.md)`、`[MySQL](MySQL.md#索引)`。
 - 锚点由 github-slugger 规则生成：小写 + 删标点 + 空格转 `-`（见 `scripts/slug.py`）。
 - 复盘薄弱点清单给链接时用 `文件名.md#锚点`，不要用相对多段路径（`../interview/JVM.md` 会死链）。
-- 这些链接是给用户回 wiki 站点查看用的，my-interview 本身不写库。
+- 这些链接是给用户回 wiki 站点查看用的，interview 本身不写库。

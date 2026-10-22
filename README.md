@@ -1,8 +1,8 @@
 # my-skills
 
 供 Codex、Claude Code 和 Pi 使用的个人 Skill 集合，
-涵盖需求开发、测试、Git 提交、中文写作、博客发布、交互学习与工具经验复用。
-`my-statusline` 仅适用于 Claude Code。
+涵盖需求开发、测试、Git 提交、内容编写、博客发布、交互学习与工具经验复用。
+`claude-statusline` 仅适用于 Claude Code。
 
 ## 包含的 Skill
 
@@ -12,21 +12,21 @@
   建立复现、诊断故障并回归；Spring 分层与基础设施经验按需读取。
 - [`code-review`](plugins/my-skills/skills/code-review/SKILL.md)：分别审查代码质量与需求符合度，
   核对验证证据和影响范围，按需进行工程复盘或代码任务交接。
-- [`git-commit-convention`](plugins/my-skills/skills/git-commit-convention/SKILL.md)：检查提交范围，
+- [`git-commit`](plugins/my-skills/skills/git-commit/SKILL.md)：检查提交范围，
   生成中文 Conventional Commits 提交说明，仅在用户授权时暂存和提交。
 - [`env-tool-log`](plugins/my-skills/skills/env-tool-log/SKILL.md)：复用 shell 与内置工具的经验，
   同类错误原位更新，修复后保留预防规则。
-- [`cn-writing`](plugins/my-skills/skills/cn-writing/SKILL.md)：规范中文技术写作的行文、结构、标点与源码换行；
+- [`content-write`](plugins/my-skills/skills/content-write/SKILL.md)：规范文章、说明、文案等文本的表达、结构与语义，按语言和格式应用排版规则；
   编写 Agent 文档时按需检查引用触发、完成条件和信息层级。
-- [`my-blog-build`](plugins/my-skills/skills/my-blog-build/SKILL.md)：为 mars-blog 编写或修改内容，
+- [`blog-publish`](plugins/my-skills/skills/blog-publish/SKILL.md)：为 mars-blog 编写或修改内容，
   通过内容 API 上传并触发 Cloudflare Pages 构建。
-- [`my-note-publish`](plugins/my-skills/skills/my-note-publish/SKILL.md)：通过博客内容 API 发布无标题随记或保存草稿，
+- [`blog-note-publish`](plugins/my-skills/skills/blog-note-publish/SKILL.md)：通过博客内容 API 发布无标题随记或保存草稿，
   复用发布记录并读回验证。
-- [`my-interview`](plugins/my-skills/skills/my-interview/SKILL.md)：基于本地 interview-wiki 题库练习算法与后端八股，
+- [`interview`](plugins/my-skills/skills/interview/SKILL.md)：基于本地 interview-wiki 题库练习算法与后端八股，
   支持练习和模拟面试，复用已有档案记录掌握证据并安排复习。
-- [`my-learn`](plugins/my-skills/skills/my-learn/SKILL.md)：研究新知识并连接已有概念，
+- [`learn`](plugins/my-skills/skills/learn/SKILL.md)：研究新知识并连接已有概念，
   生成 HTML 交互课程，依据真实练习表现调整难度、补齐短板并跨会话续学。
-- [`my-statusline`](plugins/my-skills/skills/my-statusline/SKILL.md)：配置 Claude Code 底部状态栏，
+- [`claude-statusline`](plugins/my-skills/skills/claude-statusline/SKILL.md)：配置 Claude Code 底部状态栏，
   显示模型、目录、Git 分支、上下文用量与订阅用量。
 
 ## 统一安装与更新
@@ -42,14 +42,14 @@
 npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code
 ```
 
-在交互界面选择除 `my-statusline` 外的10个技能，并选择链接安装(Symlink)。
+在交互界面选择除 `claude-statusline` 外的10个技能，并选择链接安装(Symlink)。
 安装器维护共享内容与客户端入口：Codex、Pi 读取 `~/.agents/skills/`，
 Claude Code 通过 `~/.claude/skills/` 中的链接读取。
 
 Claude Code 的状态栏技能单独安装：
 
 ```bash
-npx skills add kingstar718/my-skills -g -a claude-code --skill my-statusline
+npx skills add kingstar718/my-skills -g -a claude-code --skill claude-statusline
 ```
 
 安装后新建会话，Pi 也可执行 `/reload`。
@@ -70,34 +70,60 @@ npx skills update -g
 
 ### 从旧技能名称迁移
 
-`spec-coding` 已改为 `code-spec`，`spring-testing` 已改为 `code-test`，另新增 `code-review`。
-源码不保留旧技能入口；原需求记录中的旧名称只用于追溯迁移来源。
+发布包含改名的版本后，按下表迁移；源码不保留旧技能的兼容副本。
 
-使用 skills CLI 安装的用户，发布新版后先移除这两个旧名称，再安装新入口：
+| 旧名称 | 当前名称 |
+| --- | --- |
+| `git-commit-convention` | `git-commit` |
+| `my-blog-build` | `blog-publish` |
+| `my-note-publish` | `blog-note-publish` |
+| `my-interview` | `interview` |
+| `my-learn` | `learn` |
+| `my-statusline` | `claude-statusline` |
+| `cn-writing` | `content-write` |
+
+先安装并检查新入口，再移除已安装的旧名称：
 
 ```bash
-npx skills remove spec-coding spring-testing -g
+npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code --skill git-commit blog-publish blog-note-publish interview learn content-write
+npx skills list -g
+```
+
+原来使用状态栏技能的 Claude Code 用户另装专用入口：
+
+```bash
+npx skills add kingstar718/my-skills -g -a claude-code --skill claude-statusline
+```
+
+确认对应新入口存在后，按名称移除旧技能副本：
+
+```bash
+npx skills remove git-commit-convention my-blog-build my-note-publish my-interview my-learn my-statusline cn-writing -g
+```
+
+更早的 `spec-coding`、`spring-testing` 已分别改为 `code-spec`、`code-test`，另新增 `code-review`。
+仍在使用旧代码技能时，同样先安装新入口再移除旧名称：
+
+```bash
 npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code --skill code-spec code-test code-review
+npx skills remove spec-coding spring-testing -g
 ```
 
-只选择实际使用的客户端；其他已安装技能继续通过 `skills update` 更新。
-改名或新增技能不能只依赖旧名称的更新检查，应显式安装新入口。
-插件或 Pi 包安装的用户沿用原更新方式，并检查旧名称是否已移除。
-仓库外 `AGENTS.md`、调用命令和配置中显式引用旧名称的地方需同步修改；
-学习档案和 env-tool-log 本机数据无需搬移。
+只选择实际使用的客户端和技能。改名或新增入口需显式安装，不能只依赖 `skills update`。
+插件或 Pi 包用户沿用原更新方式，并检查旧入口是否移除；迁移后新建会话，Pi 也可 `/reload`。
+仓库外指令、调用命令和配置中显式引用旧名称的地方需同步修改。
 
-### 新增学习技能
+改名只涉及技能入口，不迁移个人数据。随记配置继续使用
+`~/.config/my-note-publish/config.json`，面试 Cookie 和内容库缓存继续使用 `~/.my-interview/`。
+已有学习档案、发布记录、环境变量、env-tool-log 数据及 `~/.claude/statusline.js` 的位置均不变。
+旧规格中的名称用于追溯，当前映射见[需求(R-07)](docs/R-07-skill-naming.md)。
 
-已安装旧版集合时，需要显式安装新增入口；普通更新不会自动选择此前未安装的技能：
+### 学习方式
 
-```bash
-npx skills add kingstar718/my-skills -g -a codex -a pi -a claude-code --skill my-learn
-```
-
-发布包含该技能的版本后执行，客户端仅选择自己实际使用的。调用示例：
+调用示例：
 
 ```text
-使用 $my-learn 帮我学习线程池，目标是能解释积压并选择合适的队列策略。
+使用 $learn 帮我学习线程池，目标是能解释积压并选择合适的队列策略。
 ```
 
 课程与个人档案保存在学习工作区，不在技能安装目录。
@@ -147,7 +173,7 @@ pi -e .
 ```
 
 安装或更新后执行 `/reload` 或新建会话。
-`package.json` 排除 Claude Code 专用的 `my-statusline`，Pi 加载其余10个 Skill。
+`package.json` 排除 Claude Code 专用的 `claude-statusline`，Pi 加载其余10个 Skill。
 
 ## 工具经验复用
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Claude Code 底部状态栏(statusLine)
-// 由 my-statusline skill 安装到 ~/.claude/statusline.js
+// 由 claude-statusline skill 安装到 ~/.claude/statusline.js
 // 从 stdin 读取 Claude Code 会话 JSON,输出:
 //   模型 | 目录 | git 分支 | 上下文用量进度条 | 5h 用量 | 7d 用量
 // 纯 node 内置模块 + git CLI,Win/Linux/Mac 三端通用。

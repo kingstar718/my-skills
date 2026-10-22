@@ -15,6 +15,7 @@ python scripts/publish_note.py setup --gui
 域名可以填 `blog.example.com`，自动补 `https://`。密码是博客的 `ADMIN_PASSWORD`。
 
 配置保存在用户目录 `~/.config/my-note-publish/config.json`，不进入 Git 仓库。
+技能入口改名为 `blog-note-publish` 后仍沿用该路径，环境变量和发布记录格式不变。
 Windows 密码由 DPAPI 加密，只有当前 Windows 用户可以解密；其他系统保存在权限 0600 的本机文件。
 再次运行 `setup` 可替换配置；取消窗口不保存、不发布。配置不会检查线上密码是否正确，发布时由 API 鉴权。
 配置完成后无需重启 Codex，脚本每次运行都会读取本机配置。

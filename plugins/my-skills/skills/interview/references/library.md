@@ -1,6 +1,6 @@
 # 内容库配置与检索映射
 
-my-interview 的题目与答案来自本地 interview-wiki 内容库。本文件记录库地址与寻址规则。
+interview 的题目与答案来自本地 interview-wiki 内容库。本文件记录库地址与寻址规则。
 
 ## 库地址
 
@@ -12,6 +12,9 @@ practice_dir: D:\projects\interview-wiki\practice # 练习工作区：代码文�
 ```
 
 > 首次通过 git 或用户输入拿到有效库后，把实际路径/地址回写到上面对应字段（`local_dir` 指向可用目录、必要时更新 `git_url`），下次直接命中本地。
+
+技能入口改名为 `interview` 后，继续复用已有练习目录、`~/.my-interview/` 下的缓存和 Cookie。
+仅改变调用名称，不新建或搬移个人档案。
 
 ## 寻址顺序
 

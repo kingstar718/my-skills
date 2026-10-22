@@ -1,9 +1,9 @@
 ---
-name: my-statusline
-description: Use when the user asks to install, apply, or manage the Claude Code status line (statusLine). Installs a status bar showing model, current directory, git branch, and a context-usage progress bar (e.g. ▓░░░░░░░░░ 23k/1m). Claude Code only — skip this skill in Codex and Pi.
+name: claude-statusline
+description: "安装、应用或管理 Claude Code 底部状态栏，显示模型、当前目录、Git 分支、上下文及订阅用量。仅适用于 Claude Code 的 statusLine，不用于 Codex 或 Pi 状态栏。"
 ---
 
-# my-statusline
+# claude-statusline
 
 为 Claude Code 配置底部状态栏(statusLine),显示:
 
@@ -17,7 +17,7 @@ description: Use when the user asks to install, apply, or manage the Claude Code
 
 ## 安装/应用
 
-当用户说「安装 statusline」「应用 my-statusline」「配置状态栏」等时,执行:
+当用户说「安装 statusline」「应用 claude-statusline」「配置状态栏」等时,执行:
 
 1. 把本 skill 目录下的 `statusline.js` 复制到 `~/.claude/statusline.js`(若已存在,覆盖前提示用户)。
 2. 确定 node 可执行路径:

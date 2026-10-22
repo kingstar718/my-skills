@@ -1,6 +1,6 @@
 ---
-name: git-commit-convention
-description: Use when the user asks to create, revise, or execute a Git commit. Generates an accurate Conventional Commit message and only stages or commits files when explicitly requested.
+name: git-commit
+description: "检查 Git 提交范围，生成或修改中文 Conventional Commit 消息，并在用户明确要求时执行暂存与提交。用于提交消息和 Git commit 任务；推送需已有明确授权。"
 ---
 
 # Git Commit 规范

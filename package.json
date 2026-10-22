@@ -1,6 +1,6 @@
 {
   "name": "my-skills",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "个人研发工作流、写作、测试、学习与环境工具 Skill 集合，供 Pi、Codex 和 Claude Code 使用",
   "keywords": [
     "pi-package",
@@ -17,7 +17,7 @@
   "pi": {
     "skills": [
       "./plugins/my-skills/skills",
-      "-./plugins/my-skills/skills/my-statusline"
+      "-./plugins/my-skills/skills/claude-statusline"
     ]
   }
 }
