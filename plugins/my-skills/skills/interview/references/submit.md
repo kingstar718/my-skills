@@ -32,7 +32,7 @@ LeetCode 只接受 `class Solution { ... }`，不能含 `main` 与自测辅助�
 ## 用法
 
 ```bash
-python <skill目录>/scripts/leetcode_submit.py --slug remove-element --file D:\projects\interview-wiki\practice\P27RemoveElementSolution.java
+python <skill目录>/scripts/leetcode_submit.py --slug remove-element --file <practice_dir>/P27RemoveElementSolution.java
 ```
 
 - `--slug`：从题库文件名取，如 `27-remove-element.md` → `remove-element`。
@@ -42,4 +42,4 @@ python <skill目录>/scripts/leetcode_submit.py --slug remove-element --file D:\
 ## 风险
 
 - 属非官方接口，违反 LeetCode ToS；个人练习低风险，别高频提交。
-- 判题结果用于复盘（写 log.md），不代表每题都必须交。
+- 判题结果用于复盘（更新错题本状态列），不代表每题都必须交。

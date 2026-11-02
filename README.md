@@ -23,7 +23,8 @@
 - [`blog-note-publish`](plugins/my-skills/skills/blog-note-publish/SKILL.md)：通过博客内容 API 发布无标题随记或保存草稿，
   复用发布记录并读回验证。
 - [`interview`](plugins/my-skills/skills/interview/SKILL.md)：基于本地 interview-wiki 题库练习算法与后端八股，
-  支持练习和模拟面试，复用已有档案记录掌握证据并安排复习。
+  支持练习和模拟面试；练习记录写回题库既有的进度勾选与错题本，
+  并用 `practice_stats.py` 校验套路速查表与 ✅ 标记，不另建平行档案。
 - [`learn`](plugins/my-skills/skills/learn/SKILL.md)：研究新知识并连接已有概念，
   生成 HTML 交互课程，依据真实练习表现调整难度、补齐短板并跨会话续学。
 - [`claude-statusline`](plugins/my-skills/skills/claude-statusline/SKILL.md)：配置 Claude Code 底部状态栏，

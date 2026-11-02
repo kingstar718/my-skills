@@ -7,11 +7,38 @@ interview 的题目与答案来自本地 interview-wiki 内容库。本文件记
 ```yaml
 local_dir: D:\projects\interview-wiki
 git_url: https://github.com/kingstar718/interview-wiki.git
-cache_dir: ~/.my-interview/interview-wiki   # git 回退时的克隆目标
-practice_dir: D:\projects\interview-wiki\practice # 练习工作区：代码文件 + profile.md + log.md（个人档案）
+cache_dir: ~/.my-interview/interview-wiki   # git 回退时的克隆目标；不承载个人记录
+
+# 练习工作区：相对内容库根，跨平台，不写盘符
+practice_dir: practice
+progress_file: content/个人记录/刷题进度.md   # 进度勾选 + 错题本
+index_file: practice/README.md               # 题目索引 + 套路速查表
 ```
 
 > 首次通过 git 或用户输入拿到有效库后，把实际路径/地址回写到上面对应字段（`local_dir` 指向可用目录、必要时更新 `git_url`），下次直接命中本地。
+> 只回写 `local_dir` / `git_url`；`practice_dir`、`progress_file`、`index_file` 是相对内容库根的布局，不随机器改动。
+
+## 练习工作区布局
+
+| 字段 | 相对路径 | 角色 | 读写 |
+|------|---------|------|------|
+| `practice_dir` | `practice/` | 每题一个 `P{题号}{英文驼峰}.java` | 读+写 |
+| `progress_file` | `content/个人记录/刷题进度.md` | 一阶段/二阶段勾选 + **错题本**表 | 改勾选、追加错题本行 |
+| `index_file` | `practice/README.md` | 题目索引 + 套路速查表 + ✅ 清单 | 由 `practice_stats.py` 生成 |
+
+写入边界：题库正文（`content/algorithms/`、`content/interview/`）只读；只允许改上面三类位置。
+
+**统计校准**（在内容库根执行）：
+
+```bash
+python <skill目录>/scripts/practice_stats.py --check   # 只报偏差，退出码 1 表示有漂移
+python <skill目录>/scripts/practice_stats.py --fix     # 重写速查表、✅ 标记与（N / M）计数
+python <skill目录>/scripts/practice_stats.py --fix --fix-list   # 同时重生成摘要里的题名清单
+```
+
+- 真源：`progress_file` 的勾选（哪些题做完）与各套路章节的题目行（分母）。
+- 脚本默认在当前目录找内容库，也可 `--wiki <dir>` 指定。
+
 
 技能入口改名为 `interview` 后，继续复用已有练习目录、`~/.my-interview/` 下的缓存和 Cookie。
 仅改变调用名称，不新建或搬移个人档案。
