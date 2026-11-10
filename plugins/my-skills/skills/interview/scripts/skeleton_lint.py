@@ -147,10 +147,14 @@ def main():
     ap.add_argument("--submission", action="store_true",
                     help="提交文件专项检查（LeetCode 自带类型不得自带定义、无 main/harness 辅助）")
     args = ap.parse_args()
+    path = Path(args.file).resolve()
+    if not path.exists():
+        print(f"文件不存在: {path}")
+        sys.exit(2)
+    code = path.read_text(encoding="utf-8")
     if args.submission:
         # --submission 模式：跳过常规骨架项，仅跑提交件专项
         fails = 0
-        code = path.read_text(encoding="utf-8")
         sel = []
         sel.append((not re.search(r"\bclass\s+(TreeNode|ListNode)\b", code),
                     "不自带 TreeNode/ListNode 定义（LeetCode 自供）"))
@@ -165,11 +169,6 @@ def main():
         print(f"\n提交件总结: {len(sel)-fails} OK / {fails} FAIL")
         sys.exit(0 if fails == 0 else 1)
 
-    path = Path(args.file).resolve()
-    if not path.exists():
-        print(f"文件不存在: {path}")
-        sys.exit(2)
-    code = path.read_text(encoding="utf-8")
 
     results, tid = checks(code, path.name, path)
     if args.strict_signature:
