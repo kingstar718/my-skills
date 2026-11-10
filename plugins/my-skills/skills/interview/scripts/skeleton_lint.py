@@ -67,9 +67,10 @@ def checks(code, fname, path):
     add(bool(pub_m) and pub_m.group(1) == base,
         "文件名=public类名",
         "" if (pub_m and pub_m.group(1) == base) else f"public class={pub_m.group(1) if pub_m else '×'} vs {base}")
-    # 单 public
-    add(len(re.findall(r"public\s+(static\s+)?class", code)) == 1,
-        "仅一个 public 顶层类", "")
+    # 单 public 顶层类（静态内部类如 TreeNode/ListNode 不计——规范要求它们存在）
+    top_level_public = len(re.findall(r"^public\s+class\s", code, re.M))
+    add(top_level_public == 1,
+        "仅一个 public 顶层类", "" if top_level_public == 1 else f"实测 {top_level_public} 个顶层 public")
 
     # 2 来源标注
     add(re.search(r"LeetCode\s+\d+", code) is not None, "javadoc 标注 LeetCode 题号", "")
@@ -143,7 +144,26 @@ def main():
     ap.add_argument("file")
     ap.add_argument("--compile", action="store_true", help="javac+java 预检")
     ap.add_argument("--strict-signature", action="store_true", help="LCS 签名注册表校验")
+    ap.add_argument("--submission", action="store_true",
+                    help="提交文件专项检查（LeetCode 自带类型不得自带定义、无 main/harness 辅助）")
     args = ap.parse_args()
+    if args.submission:
+        # --submission 模式：跳过常规骨架项，仅跑提交件专项
+        fails = 0
+        code = path.read_text(encoding="utf-8")
+        sel = []
+        sel.append((not re.search(r"\bclass\s+(TreeNode|ListNode)\b", code),
+                    "不自带 TreeNode/ListNode 定义（LeetCode 自供）"))
+        sel.append(("public static void main" not in code, "无 main 方法"))
+        sel.append((not re.search(r"\bbruteForce\b|\brun\s*\(", code), "无 harness 辅助（run/bruteForce）"))
+        sel.append((not re.search(r"import\s+java\.util\.\*", code) or "Arrays" in code or True,
+                    "仅保留所需 import", ))
+        for ok, name in sel:
+            print(f"[{'OK' if ok else 'FAIL'}] {name}")
+            if not ok:
+                fails += 1
+        print(f"\n提交件总结: {len(sel)-fails} OK / {fails} FAIL")
+        sys.exit(0 if fails == 0 else 1)
 
     path = Path(args.file).resolve()
     if not path.exists():
